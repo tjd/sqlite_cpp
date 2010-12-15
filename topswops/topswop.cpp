@@ -1,9 +1,9 @@
-// topswap.cpp
+// topswop.cpp
 
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
-#include "topswap.h"
+#include "topswop.h"
 
 ////////////////////////////////////////////////////////////
 
@@ -19,7 +19,7 @@ int try_all_random(int n, int tries) {
     random_shuffle(deck.begin(), deck.end());
     fix_shuffle(deck);
     copy(deck.begin(), deck.end(), start.begin());
-    int count = do_all_top_swaps(deck);
+    int count = do_all_top_swops(deck);
     if (count > highest_count_so_far) {
       highest_count_so_far = count;
       copy(start.begin(), start.end(), best.begin());
@@ -30,21 +30,10 @@ int try_all_random(int n, int tries) {
                    << ")" << endl;
 
   check_score(n, highest_count_so_far, best);
- //  // check if this is better the currently saved solution for n
- //  const string name = fname(n);
- //  ifstream fin(name.c_str());
- //  int curr;
- //  fin >> curr;
- //  if (highest_count_so_far > curr) {
- //    fin.close();
- //    ofstream fout(name.c_str());
- //    fout << highest_count_so_far << '\n' << best;
- //  }
-
   return highest_count_so_far;
 }
 
-int experiment_random(int tries) {
+void experiment_random(int tries) {
   if (!quiet) cout << "\n\nTopswop random guesser" << endl
                    << "Doing " << tries 
                    << " guesses for each value of n ... " << endl;
@@ -64,7 +53,7 @@ int main() {
   
   cout << "Topswop random guesser is running ..." << endl;
   int count = 1;
-  while (count == 1) {
+  while (count < tries) {
     cout << count << ' ' << flush;
     if (count % 25 == 0) cout << endl;
     ++count;

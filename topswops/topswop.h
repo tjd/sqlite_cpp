@@ -1,11 +1,11 @@
-// topswap.h
+// topswop.h
 
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
 
-#ifndef TOP_SWAP_H
-#define TOP_SWAP_H 201004L
+#ifndef TOP_SWOP_H
+#define TOP_SWOP_H 201004L
 
 #include "std_lib_facilities_ubuntu_regvec.h"
 #include <assert.h>
@@ -24,17 +24,6 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
   }
   return os;
 }
-
-// ostream& operator<<(ostream& os, const vector<int>& v) {
-//   const int n = v.size();
-//   if (n == 0) return os;
-//   else if (n == 1) os << v[0];
-//   else {  // v has at least 2 elements
-//     os << v[0];
-//     for(int i = 1; i < n; ++i) os << ", " << v[i];
-//   }
-//   return os;
-// }
  
 string int_to_str(int n) {
   if (n == 0) return "0";
@@ -68,7 +57,7 @@ typedef vector<int> perm;
 
 // file name for file storing info about n
 string fname(int n) {
-  return "topswop_num_" + int_to_str(n) + ".txt";
+  return "best_so_far/topswop_num_" + int_to_str(n) + ".txt";
 }
 
 int get_current_score(int n) {
@@ -200,19 +189,19 @@ void init_deck(vector<int>& deck) {
 // Would simplify most calling code if deck were passed by value.
 // The STL reverse is pretty good: a by-hand reverse function was
 // slightly slower.
-int do_all_top_swaps(vector<int>& deck) {
+int do_all_top_swops(vector<int>& deck) {
   int count = 0;
   while (deck[0] != 1) {
-    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swap
+    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swop
     ++count;
   }
   return count;
 }
 
-int do_all_top_swaps_copy(vector<int> deck) {
+int do_all_top_swops_copy(vector<int> deck) {
   int count = 0;
   while (deck[0] != 1) {
-    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swap
+    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swop
     ++count;
   }
   return count;
@@ -239,7 +228,7 @@ void perturb_2rot(int n) {
     for(int j = i + 1; j < n; ++j) {
       swap(v[i], v[j]);
       vector<int> vc(v);
-      int s = do_all_top_swaps(vc);
+      int s = do_all_top_swops(vc);
       if (s > best_so_far) {
         best_so_far = s;
         copy(v.begin(), v.end(), best.begin());
@@ -290,7 +279,7 @@ void perturb_3rot(int n) {
       for(int k = j + 1; k < n; ++k) {
         rot3(v[i], v[j], v[k]);
         vector<int> vc(v);
-        int s = do_all_top_swaps(vc);
+        int s = do_all_top_swops(vc);
         if (s > best_so_far) {
           best_so_far = s;
           copy(v.begin(), v.end(), best.begin());
@@ -298,7 +287,7 @@ void perturb_3rot(int n) {
         
         rot3(v[i], v[j], v[k]);
         vc = v;
-        s = do_all_top_swaps(vc);
+        s = do_all_top_swops(vc);
         if (s > best_so_far) {
           best_so_far = s;
           copy(v.begin(), v.end(), best.begin());
