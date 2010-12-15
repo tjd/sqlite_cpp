@@ -10,7 +10,7 @@ n_vals = [  2,  3,  5,  7, 11,
            73, 79, 83, 89, 97];
 
 def make_file_name(n):
-    return 'topswop_num_%s.txt' % n
+    return 'best_so_far/topswop_num_%s.txt' % n
 
 def make_all_num_files():
     print 'Are you you want to do this?'
