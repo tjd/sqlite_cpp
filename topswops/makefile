@@ -13,5 +13,5 @@ topswop_prev_dfs_ex: topswop_prev_dfs.cpp topswop.h
 	g++ -O3 topswop_prev_dfs.cpp -o topswop_prev_dfs_ex
 
 
-clean_ex:
+clean:
 	rm -rf *_ex

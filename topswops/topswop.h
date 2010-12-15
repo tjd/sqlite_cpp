@@ -198,13 +198,8 @@ int do_all_top_swops(vector<int>& deck) {
   return count;
 }
 
-int do_all_top_swops_copy(vector<int> deck) {
-  int count = 0;
-  while (deck[0] != 1) {
-    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swop
-    ++count;
-  }
-  return count;
+inline int do_all_top_swops_copy(vector<int> deck) {
+  do_all_top_swops(deck);
 }
 
 void perturb_2rot(int n) {
