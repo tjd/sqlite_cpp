@@ -3,6 +3,7 @@
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
+#define NDEBUG
 #include "topswop.h"
 
 ////////////////////////////////////////////////////////////
