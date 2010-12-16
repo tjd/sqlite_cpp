@@ -15,15 +15,14 @@ int main() {
     session sql(sqlite3, db_name);
 
     cout << "Creating topswops table if necessary ..." << endl;
-    sql << "CREATE TABLE IF NOT EXISTS topswops(n INTEGER PRIMARY KEY, score INTEGER)";
+    sql << "CREATE TABLE IF NOT EXISTS topswops(n INTEGER PRIMARY KEY, score INTEGER, date TEXT)";
 
     cout << "Inserting some test values ..." << endl;
-    // BEGIN ... COMMIT perform the insertions in a single transaction
-    // (for speed)
+    // perform the insertions in a single transaction (for speed)
     sql.begin();
     for(int i = 2; i <= 97; ++i) {
-      sql << "INSERT OR REPLACE INTO topswops(n, score) VALUES(" << i 
-          << ", 0)";
+      sql << "INSERT OR REPLACE INTO topswops(n, score, date) VALUES(" << i 
+          << ", " << i*i << ", date('now'))";
     }
     sql.commit();
 
@@ -31,8 +30,15 @@ int main() {
     for(int i = 2; i <= 97; ++i) {
       int score = -1;
       sql << "SELECT score FROM topswops WHERE n = " << i, into(score);
-      cout << "n = " << i << ", score = " << score << endl;
+      string date;
+      sql << "SELECT date FROM topswops WHERE n = " << i, into(date);
+      cout << "n = " << i << ", score = " << score << " (" << date 
+           << ")" << endl;
     }
+
+    int sum = 0;
+    sql << "SELECT sum(score) FROM topswops", into(sum);
+    cout << "Total sum = " << sum << endl;
 
     //    vector<int> ns, scores;
     //    sql << "select n from topswops", into(ns);
