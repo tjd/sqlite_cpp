@@ -20,7 +20,7 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
     if (iterations >= stop_after) return highest_count_so_far;
 
     if (deck[0] == 1) {
-      shuffle(deck);
+      shuffle_no_fix(deck);
       cout << '1' << flush;
     }
     ++count;
@@ -41,9 +41,9 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
         cout << "\nn = " << n << ", score = " << curr 
              << " (" << diff << " improvement)" << endl
              << best << endl;
-        set_current_score(n, curr, best);
-        perturb_2rot(n);
-        perturb_3rot(n);
+        set_current_perm(n, best);
+        //        perturb_2rot(n);
+        //        perturb_3rot(n);
       }
     }
   }
@@ -75,13 +75,13 @@ void test_perm() {
   cout << "done\n";
 }
 
-void test_one() {
-  const int n = 97;
-  const int restart = 10000000;
-  cout << "\nTopswop Random Restart Permuter, n = " << n 
-       << ", restart = " << restart << endl;
-  try_all_perm_random_restart(n, restart, 1000000000);
-}
+// void test_one() {
+//   const int n = 97;
+//   const int restart = 10000000;
+//   cout << "\nTopswop Random Restart Permuter, n = " << n 
+//        << ", restart = " << restart << endl;
+//   try_all_perm_random_restart(n, restart, 1000000000);
+// }
 
 int main() {
   forever();
