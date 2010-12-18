@@ -6,10 +6,9 @@
 #define NDEBUG
 #include "topswop.h"
 
-
 int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
-  int curr = get_current_score(n);
-  vector<int> deck(n), start(n), best(n);
+  int curr_best = get_current_score(n);
+  perm deck(n), best(n);
   init_deck(deck);
   shuffle_no_fix(deck);
   int highest_count_so_far = -1;
@@ -26,24 +25,23 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
     ++count;
     if (count >= restart_at) {
       count = 0;
-      shuffle(deck);
+      shuffle_no_fix(deck);
       cout << '.' << flush;
     }
-    copy(deck.begin(), deck.end(), start.begin());
-    int count = do_all_top_swops(start);
+
+    int count = do_all_top_swops_copy(deck);
 
     if (count > highest_count_so_far) {
       highest_count_so_far = count;
-      copy(deck.begin(), deck.end(), best.begin());
-      if (highest_count_so_far > curr) {
-        int diff = highest_count_so_far - curr;
-        curr = highest_count_so_far;
-        cout << "\nn = " << n << ", score = " << curr 
+      //      copy(deck.begin(), deck.end(), best.begin());
+      best = deck;
+      if (highest_count_so_far > curr_best) {
+        int diff = highest_count_so_far - curr_best;
+        curr_best = highest_count_so_far;
+        cout << "\nn = " << n << ", score = " << curr_best 
              << " (" << diff << " improvement)" << endl
              << best << endl;
         set_current_perm(n, best);
-        //        perturb_2rot(n);
-        //        perturb_3rot(n);
       }
     }
   }
