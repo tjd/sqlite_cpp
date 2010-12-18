@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 #include <exception>
-#include<algorithm>
+#include <algorithm>
 
 using namespace soci;
 using namespace std;

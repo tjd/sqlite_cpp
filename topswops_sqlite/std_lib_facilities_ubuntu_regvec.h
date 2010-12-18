@@ -164,7 +164,7 @@ inline void error(const string& s, int i)
 
 #if _MSC_VER<1500
 	// disgusting macro hack to get a range checked string:
-	#define string String
+	//#define string String
 	// MS C++ 9.0 have a built-in assert for string range check
 	// and uses "std::string" in several places so that macro substitution fails
 #endif
