@@ -39,6 +39,17 @@ def perm_score(perm):
         count += 1
     return count
 
+def make_test_db():
+    conn = sqlite3.connect('test.db')
+    c = conn.cursor()
+    c.execute("CREATE TABLE topswops(n INTEGER PRIMARY KEY, score INTEGER, perm TEXT, date TEXT)")
+    for n in range(2, 98):
+        sql = "insert into topswops(n, score, perm, date) values(%s, %s, '%s', date('now'))" % (n, 0, ', '.join(str(i) for i in range(1, n+1)))
+        print sql
+        c.execute(sql)
+    conn.commit()
+    conn.close()
+
 def transfer_file_to_db():
     """ One-time function for populating sqlite db with current best
     scores.
@@ -174,5 +185,7 @@ if __name__ == '__main__':
         list_current_best_scores()
     elif params[0] == 'check':
         check_db_okay()
+    elif params[0] == 'test':
+        make_test_db()
 #    elif params[0] == 'transfer':
 #        transfer_file_to_db()

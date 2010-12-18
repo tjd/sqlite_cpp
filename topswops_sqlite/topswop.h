@@ -46,7 +46,7 @@ int do_all_top_swops(perm& deck) {
 }
 
 inline int do_all_top_swops_copy(perm deck) {
-  do_all_top_swops(deck);
+  return do_all_top_swops(deck);
 }
 
 
@@ -139,14 +139,15 @@ perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
 
 bool set_current_perm(int n, const perm& v, 
                       const string& dbname = "best_so_far.db") {
+  cout << "set_current_perm called ..." << endl;
   assert(n == v.size());
   assert(is_perm(v));
-  const int curr_best_score = get_current_score(n);
+  const int curr_best_score = get_current_score(n, dbname);
   const int curr_score = do_all_top_swops_copy(v);
   if (curr_score > curr_best_score) {
     try {
       cout << "n = " << n << " improvement = " 
-           << (curr_score - curr_best_score) << endl;
+           << (curr_score - curr_best_score) << ", " << dbname << endl;
       cout << "score = " << curr_score << endl;
       cout << "perm = " << v << endl << endl;
 

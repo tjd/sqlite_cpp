@@ -6,12 +6,15 @@
 #define NDEBUG
 #include "topswop.h"
 
+const string dbname = "best_so_far.db";
+
 int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
-  int curr_best = get_current_score(n);
+  int curr_best = get_current_score(n, dbname);
+  //cout << "curr_best = " << curr_best << endl;
   perm deck(n), best(n);
   init_deck(deck);
   shuffle_no_fix(deck);
-  int highest_count_so_far = -1;
+  int highest_count_so_far = 0;
   int count = 0;
   int iterations = 0;
   while (next_permutation(deck.begin(), deck.end())) {
@@ -29,19 +32,23 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
       cout << '.' << flush;
     }
 
+
     int count = do_all_top_swops_copy(deck);
+    //cout << "score(" << deck << ") = " << count << endl;
 
     if (count > highest_count_so_far) {
       highest_count_so_far = count;
-      //      copy(deck.begin(), deck.end(), best.begin());
       best = deck;
+      //      cout << "highest_count_so_far = " << highest_count_so_far << endl;
+      //      cout << best << endl;
       if (highest_count_so_far > curr_best) {
+        cout << '!' << flush;
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
-        cout << "\nn = " << n << ", score = " << curr_best 
-             << " (" << diff << " improvement)" << endl
-             << best << endl;
-        set_current_perm(n, best);
+//         cout << "\nn = " << n << ", score = " << curr_best 
+//              << " (" << diff << " improvement)" << endl
+//              << best << endl;
+        set_current_perm(n, best, dbname);
       }
     }
   }
@@ -73,14 +80,15 @@ void test_perm() {
   cout << "done\n";
 }
 
-// void test_one() {
-//   const int n = 97;
-//   const int restart = 10000000;
-//   cout << "\nTopswop Random Restart Permuter, n = " << n 
-//        << ", restart = " << restart << endl;
-//   try_all_perm_random_restart(n, restart, 1000000000);
-// }
+ void test_one() {
+   const int n = 7;
+   const int restart = 5; //10000000;
+   cout << "\nTopswop Random Restart Permuter, n = " << n 
+        << ", restart = " << restart << endl;
+   try_all_perm_random_restart(n, restart, 15); // 1000000000);
+ }
 
 int main() {
   forever();
+  //test_one();
 }
