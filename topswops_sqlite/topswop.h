@@ -139,30 +139,37 @@ perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
 
 bool set_current_perm(int n, const perm& v, 
                       const string& dbname = "best_so_far.db") {
-  cout << "set_current_perm called ..." << endl;
-  assert(n == v.size());
-  assert(is_perm(v));
-  const int curr_best_score = get_current_score(n, dbname);
-  const int curr_score = do_all_top_swops_copy(v);
-  if (curr_score > curr_best_score) {
-    try {
+  //cout << "set_current_perm called ..." << endl;
+  bool result;
+  try {
+    assert(n == v.size());
+    assert(is_perm(v));
+    session sql(sqlite3, dbname);
+    sql << "begin exclusive transaction";
+    //    const int curr_best_score = get_current_score(n, dbname);
+    int curr_best_score;
+    sql << "SELECT score FROM topswops WHERE n = " << n, into(curr_best_score);
+    const int curr_score = do_all_top_swops_copy(v);
+    if (curr_score > curr_best_score) {
       cout << "n = " << n << " improvement = " 
            << (curr_score - curr_best_score) << ", " << dbname << endl;
       cout << "score = " << curr_score << endl;
       cout << "perm = " << v << endl << endl;
-
-      session sql(sqlite3, dbname);
+      
       int score = -1;
       sql << "insert or replace into topswops(n, score, perm, date) "
           << "values(" << n << ", " 
           << curr_score << ", '" 
           << v << "', date('now'))";
-      return true;
-    } catch (exception const &e) {
-      cerr << "Error: " << e.what() << '\n';
+      result = true;
     }
+    result = false;
+    sql << "commit transaction";
+  } catch (exception const &e) {
+    cerr << "Error: " << e.what() << '\n';
+    result = false;
   }
-  return false;
+  return result;
 }
 
 
