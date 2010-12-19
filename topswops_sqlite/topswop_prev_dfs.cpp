@@ -114,7 +114,7 @@ bool search_back(perm p) {
       int diff = score - best_score;
       best = *curr_perm;
       best_score = score;
-      if (set_current_score(n, best_score, best)) {
+      if (set_current_perm(n, best)) {
         cout << "\nn = " << n << " improvement of " << diff << endl;
         cout << "improved score = " << best_score << endl;
         cout << " improved perm = " << best << endl;
@@ -185,16 +185,13 @@ void random_improve() {
 }
 
 void improve_current_best_perms() {
-  for(int i = 0; i < n_vals_size; ++i) {
-    const int n = n_vals[i];
+  for(int i = 2; i < 98; ++i) {
+    const int n = i; 
     cout << "---------------------------------------" << endl;
     cout << n << endl;
     cout << "---------------------------------------" << endl;
     perm* p = get_current_perm(n);
     search_back(*p);
-//     if (search_back(*p)) {
-//       set_current_score(n, do_all_top_swops_copy(*p), *p);
-//     }
     delete p;
   }
 }
@@ -205,7 +202,7 @@ void test4(int n) {
   perm* p = get_current_perm(n);
   cout << "n = " << n << ", score = " << score << ": " << *p << endl;
   if (search_back(*p)) {
-    set_current_score(n, do_all_top_swops_copy(*p), *p);
+    set_current_perm(n, *p);
   }
 }
 
@@ -214,7 +211,7 @@ void test4() {
   perm* p37 = get_current_perm(37);
   cout << "n = 37, score = " << score37 << ": " << *p37 << endl;
   if (search_back(*p37)) {
-    set_current_score(37, do_all_top_swops_copy(*p37), *p37);
+    set_current_perm(37, *p37);
   }
 }
 
@@ -383,6 +380,7 @@ void test1() {
 int main() {
   //  test4(73);
   //test6();
-  // improve_current_best_perms();
-  random_improve();
+  improve_current_best_perms();
+  //ensure_increasing_scores();
+  //random_improve();
 }

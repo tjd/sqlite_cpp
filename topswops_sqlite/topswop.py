@@ -50,32 +50,43 @@ def make_test_db():
     conn.commit()
     conn.close()
 
-def transfer_file_to_db():
-    """ One-time function for populating sqlite db with current best
-    scores.
-     "INSERT OR REPLACE INTO topswops(n, score, perm, date) VALUES(" 
-    """
-    #os.chdir('best_so_far')
-    conn = sqlite3.connect('best_so_far.db')
-    c = conn.cursor()
-    c.execute("CREATE TABLE topswops(n INTEGER PRIMARY KEY, score INTEGER, perm TEXT, date TEXT)")
-    for n in n_vals:
-        print 'n = %s' % n
-        f = open('topswop_num_%s.txt' % n, 'r')
-        score = int(f.next().strip())
-        #print 'score = %s' % score
-        s = f.next().strip()
-        #print 's = %s' % s
-        perm = [int(i) for i in s.split(', ')]
-        #print 'perm = %s' % perm
-        sql = "insert into topswops(n, score, perm, date) values(%s, %s, '%s', date('now'))" % (n, score, s)
-        print sql
-        c.execute(sql)
-        print
-    conn.commit()
-    conn.close()
-    check_db_okay()
-
+# def add_no_primes():
+#     """ One-time function to add non-prime rows to DB.
+#     """
+#     conn = sqlite3.connect('best_so_far.db')
+#     c = conn.cursor()
+#     for n in range(4, 97):
+#         if n not in n_vals:
+#             c.execute("insert into topswops(n, score, perm, date) values(%s, %s, '%s', date('now'))" % (n, 0, ', '.join(str(i) for i in range(1, n+1))))
+#     conn.commit()
+#     conn.close()
+#     
+# def transfer_file_to_db():
+#     """ One-time function for populating sqlite db with current best
+#     scores.
+#      "INSERT OR REPLACE INTO topswops(n, score, perm, date) VALUES(" 
+#     """
+#     #os.chdir('best_so_far')
+#     conn = sqlite3.connect('best_so_far.db')
+#     c = conn.cursor()
+#     c.execute("CREATE TABLE topswops(n INTEGER PRIMARY KEY, score INTEGER, perm TEXT, date TEXT)")
+#     for n in n_vals:
+#         print 'n = %s' % n
+#         f = open('topswop_num_%s.txt' % n, 'r')
+#         score = int(f.next().strip())
+#         #print 'score = %s' % score
+#         s = f.next().strip()
+#         #print 's = %s' % s
+#         perm = [int(i) for i in s.split(', ')]
+#         #print 'perm = %s' % perm
+#         sql = "insert into topswops(n, score, perm, date) values(%s, %s, '%s', date('now'))" % (n, score, s)
+#         print sql
+#         c.execute(sql)
+#         print
+#     conn.commit()
+#     conn.close()
+#     check_db_okay()
+# 
 def get_db_row(n, dbname = 'best_so_far.db'):
     """ Retrieve the best score so far for n.
     """
@@ -151,9 +162,10 @@ def gen_num_report(dbname = 'best_so_far.db'):
     total_score = 0
     submit = []
     for row in c:
-        score, perm = row[1], row[2]
-        total_score += score
-        submit.append(perm)
+        n, score, perm = row[0], row[1], row[2]
+        if n in n_vals:
+            total_score += score
+            submit.append(perm)
     print
     print 'Submit the following for a score of %s: ' % total_score
     print ';\n\n'.join(submit)
@@ -185,7 +197,10 @@ if __name__ == '__main__':
         list_current_best_scores()
     elif params[0] == 'check':
         check_db_okay()
-    elif params[0] == 'test':
+    elif params[0] == 'maketestdb':
         make_test_db()
+#     elif params[0] == 'addnoprimes':
+#         add_no_primes()
+# 
 #    elif params[0] == 'transfer':
 #        transfer_file_to_db()
