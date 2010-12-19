@@ -21,6 +21,7 @@ using namespace soci;
 using namespace std;
 
 typedef vector<int> perm;
+typedef const auto_ptr<perm> perm_ptr;
 
 // Note: Optimal values for 2, 3, 5, 7, 11, 13 have been found, so
 // need to do any computation on those.
@@ -253,7 +254,7 @@ bool search_back(perm p) {
 void improve_current_best_perms() {
   for(int i = 2; i < 98; ++i) {
     const int n = i; 
-    auto_ptr<perm> p(get_current_perm(n));
+    perm_ptr p(get_current_perm(n));
     search_back(*p);
     //delete p;
   }
@@ -267,7 +268,7 @@ void ensure_increasing_scores() {
   for(int n = 3; n < 98; ++n) {
     int score = get_current_score(n);
     if (score < score_prev) {
-      auto_ptr<perm> perm_prev(get_current_perm(n-1));  // get the previous perm
+      perm_ptr perm_prev(get_current_perm(n-1));  // get the previous perm
       perm perm_n = *perm_prev;                 // copy it
       perm_n.push_back(n);                      // append n
       search_back(perm_n);                      // any more improvement?

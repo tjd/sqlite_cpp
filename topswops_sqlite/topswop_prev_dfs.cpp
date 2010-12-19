@@ -19,37 +19,6 @@ void print_stack(const vector<perm*>& stack) {
 }
 
 
-/*
-int add_kids(perm* v, vector<perm*>& stack) {
-  //cout << "add_kids(" << *v << ", ";
-  //print_stack(stack);
-  //cout << ") called ..." << endl;
-  assert(is_perm(*v));
-#ifndef NDEBUG
-  perm vc(*v);
-#endif
-  int count = 0;
-  int i = 1;
-  for(perm::iterator vp = v->begin(); vp < v->end(); ++vp) {
-    //cout << "i = " << i << endl;
-    if (*vp == i && i != 1) {
-      perm* next_perm = new perm(*v);
-      assert(is_perm(*next_perm));
-      reverse(next_perm->begin(), next_perm->begin() + *vp);
-      assert(is_perm(*next_perm));
-      stack.push_back(next_perm);
-      ++count;
-    }
-    ++i;
-  }
-  //cout << "out of for-loop" << endl;
-  //cout << "vc = " << vc << endl;
-  assert(count == count_home_skip_first(&vc));
-  //cout << "... add_kids finished" << endl;
-  return count;
-}
-*/
-
 perm* pop(vector<perm*>& stack) {
   assert(!stack.empty());
   perm* temp = stack.back();
@@ -66,58 +35,6 @@ void random_start(perm* p) {
   if (p->front() != 1) error("perm must start with 1");
 }
 
-/*
-// generate a new permutation by searching backwards from p 
-
-// TODO: probably has memory leaks; indeed failed with a std:bad_alloc
-// on one run
-// TODO: add a cut-off to abort the search after certain number of tries
-// TODO: decrease file I/O by passing in best n-val so far
-bool search_back(perm p) {
-  //cout << "search_back(" << p << ") called ..." << endl;
-  assert(is_perm(p));
-  const int n = p.size();
-  //cout << "  n = " << n << endl;
-  const int p_score = do_all_top_swops_copy(p);
-  //cout << "  p_score = " << p_score << endl;
-  perm best(p);
-  int best_score = p_score;
-  vector<perm*> stack;
-  stack.push_back(&p);
-  while (!stack.empty()) {
-    //cout << '(' << stack.size() << ')' << flush;
-    //perm* curr_perm = pop(stack);
-    // pop the stack
-    perm* curr_perm = stack.back();
-    stack.pop_back();
-
-    //cout << "curr_perm = " << *curr_perm << endl;
-    assert(is_perm(*curr_perm));
-    int score = do_all_top_swops_copy(*curr_perm);
-    //cout << "  score = " << score << endl;
-    if (score > best_score) {
-      int diff = score - best_score;
-      best = *curr_perm;
-      best_score = score;
-      if (set_current_perm(n, best)) {
-        cout << "\nn = " << n << " improvement of " << diff << endl;
-        cout << "improved score = " << best_score << endl;
-        cout << " improved perm = " << best << endl;
-      }
-    }
-    add_kids(curr_perm, stack);
-    //cout << "calling delete ..." << endl;
-    assert(is_perm(*curr_perm));
-    //cout << "curr_perm = " << *curr_perm << endl;
-    if (curr_perm != &p)
-      delete curr_perm;
-    //cout << "... delete finished" << endl;
-  } // while
-
-  return false;
-}
-
-*/
 
 /*
 
@@ -146,11 +63,11 @@ void test6_do_not_run() {
 
 void random_improve(int n, int tries) {
   for(int i = 0; i < tries; ++i) {
-    perm* p = range(n);
+    perm_ptr p(range(n));
     shuffle(*p);
     do_all_top_swops(*p);
     search_back(*p);
-    delete p;
+    //delete p;
   }
 }
 
@@ -161,19 +78,6 @@ void random_improve() {
   }
 }
 
-/*
-void improve_current_best_perms() {
-  for(int i = 2; i < 98; ++i) {
-    const int n = i; 
-    cout << "---------------------------------------" << endl;
-    cout << n << endl;
-    cout << "---------------------------------------" << endl;
-    perm* p = get_current_perm(n);
-    search_back(*p);
-    delete p;
-  }
-}
-*/
 
 void test4(int n) {
   int score = get_current_score(n);
@@ -221,7 +125,7 @@ void test3() {
       swap(stack[r1], stack[r2]);
       cout << '.' << flush;
     }
-    perm* curr_perm = pop(stack);
+    perm* curr_perm(pop(stack));
     assert(is_perm(*curr_perm));
     int score = do_all_top_swops_copy(*curr_perm);
     if (score > best_score) {
