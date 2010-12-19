@@ -49,7 +49,6 @@ inline int do_all_top_swops_copy(perm deck) {
   return do_all_top_swops(deck);
 }
 
-
 void fix_shuffle(perm& v) {
   if (v[0] == 1) {
     for(int i = 1; i < v.size(); ++i) {
@@ -69,7 +68,6 @@ inline void shuffle(perm& v) {
 inline void shuffle_no_fix(perm& v) {
   random_shuffle(v.begin(), v.end());
 }
-
 
 // returns a pointer to a new vector<int> initialized to 1, 2, ..., n
 perm* range(int n) {
@@ -173,15 +171,114 @@ bool set_current_perm(int n, const perm& v,
 }
 
 
-/*
+int count_home_skip_first(perm* p) {
+  int count = 0;
+  int i = 2;
+  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
+    if (*vp == i) ++count;
+    ++i;
+  }
+  return count;
+}
 
-// check if this is better the currently saved solution for n
-void check_score(int n, int new_score, const perm& new_perm) {
-  int curr = get_current_score(n);
-  if (new_score > curr) {
-    set_current_score(n, new_score, new_perm);
+int has_home_num(perm* p) {
+  int i = 2;
+  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
+    if (*vp == i) return true;
+    ++i;
+  }
+  return false;
+}
+
+int add_kids(perm* v, vector<perm*>& stack) {
+  assert(is_perm(*v));
+#ifndef NDEBUG
+  perm vc(*v);
+#endif
+  int count = 0;
+  int i = 1;
+  for(perm::iterator vp = v->begin(); vp < v->end(); ++vp) {
+    if (*vp == i && i != 1) {
+      perm* next_perm = new perm(*v);
+      assert(is_perm(*next_perm));
+      reverse(next_perm->begin(), next_perm->begin() + *vp);
+      assert(is_perm(*next_perm));
+      stack.push_back(next_perm);
+      ++count;
+    }
+    ++i;
+  }
+  assert(count == count_home_skip_first(&vc));
+  return count;
+}
+
+// generate a new permutation by searching backwards from p 
+//
+// TODO: probably has memory leaks; indeed failed with a std:bad_alloc
+// on one run
+// TODO: add a cut-off to abort the search after certain number of tries
+// TODO: decrease file I/O by passing in best n-val so far
+bool search_back(perm p) {
+  assert(is_perm(p));
+  const int n = p.size();
+  const int p_score = do_all_top_swops_copy(p);
+  perm best(p);
+  int best_score = p_score;
+  vector<perm*> stack;
+  stack.push_back(&p);
+  while (!stack.empty()) {
+    perm* curr_perm = stack.back();
+    stack.pop_back();
+
+    assert(is_perm(*curr_perm));
+    int score = do_all_top_swops_copy(*curr_perm);
+    if (score > best_score) {
+      int diff = score - best_score;
+      best = *curr_perm;
+      best_score = score;
+      if (set_current_perm(n, best)) {
+        cout << "\nn = " << n << " improvement of " << diff << endl;
+        cout << "improved score = " << best_score << endl;
+        cout << " improved perm = " << best << endl;
+      }
+    }
+    add_kids(curr_perm, stack);
+    assert(is_perm(*curr_perm));
+    if (curr_perm != &p)
+      delete curr_perm;
+  } // while
+  return false;
+}
+
+void improve_current_best_perms() {
+  for(int i = 2; i < 98; ++i) {
+    const int n = i; 
+    auto_ptr<perm> p(get_current_perm(n));
+    search_back(*p);
+    //delete p;
   }
 }
-*/
+
+// Each score from the 2nd onwards should be greater than the one just
+// before it. If not, construct a new permutation consisting of the
+// (higher scoring) previous one with n appended to the end.
+void ensure_increasing_scores() {
+  int score_prev = get_current_score(2);
+  for(int n = 3; n < 98; ++n) {
+    int score = get_current_score(n);
+    if (score < score_prev) {
+      auto_ptr<perm> perm_prev(get_current_perm(n-1));  // get the previous perm
+      perm perm_n = *perm_prev;                 // copy it
+      perm_n.push_back(n);                      // append n
+      search_back(perm_n);                      // any more improvement?
+      set_current_perm(n, perm_n);              // save to DB
+      score_prev = get_current_score(n);
+      //delete perm_prev;
+    } else {
+      score_prev = score;
+    }
+  } // for
+  improve_current_best_perms();
+}
 
 #endif

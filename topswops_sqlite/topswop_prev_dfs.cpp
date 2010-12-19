@@ -18,25 +18,8 @@ void print_stack(const vector<perm*>& stack) {
   }
 }
 
-int count_home_skip_first(perm* p) {
-  int count = 0;
-  int i = 2;
-  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
-    if (*vp == i) ++count;
-    ++i;
-  }
-  return count;
-}
 
-int has_home_num(perm* p) {
-  int i = 2;
-  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
-    if (*vp == i) return true;
-    ++i;
-  }
-  return false;
-}
-
+/*
 int add_kids(perm* v, vector<perm*>& stack) {
   //cout << "add_kids(" << *v << ", ";
   //print_stack(stack);
@@ -65,6 +48,7 @@ int add_kids(perm* v, vector<perm*>& stack) {
   //cout << "... add_kids finished" << endl;
   return count;
 }
+*/
 
 perm* pop(vector<perm*>& stack) {
   assert(!stack.empty());
@@ -82,6 +66,7 @@ void random_start(perm* p) {
   if (p->front() != 1) error("perm must start with 1");
 }
 
+/*
 // generate a new permutation by searching backwards from p 
 
 // TODO: probably has memory leaks; indeed failed with a std:bad_alloc
@@ -129,18 +114,10 @@ bool search_back(perm p) {
     //cout << "... delete finished" << endl;
   } // while
 
-  /*
-  if (best_score > p_score) {
-    int diff = best_score - p_score;
-    cout << "n = " << n << " improvement of " << diff << endl;
-    cout << "improved score = " << best_score << endl;
-    cout << " improved perm = " << best << endl;
-    p = best;
-    return true;
-  }
-  */
   return false;
 }
+
+*/
 
 /*
 
@@ -184,6 +161,7 @@ void random_improve() {
   }
 }
 
+/*
 void improve_current_best_perms() {
   for(int i = 2; i < 98; ++i) {
     const int n = i; 
@@ -195,7 +173,7 @@ void improve_current_best_perms() {
     delete p;
   }
 }
-
+*/
 
 void test4(int n) {
   int score = get_current_score(n);
