@@ -3,7 +3,6 @@
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
-
 #ifndef TOP_SWOP_H
 #define TOP_SWOP_H 201012L
 
@@ -269,6 +268,46 @@ bool search_back(perm p) {
       }
     }
     add_kids(curr_perm, stack);
+    assert(is_perm(*curr_perm));
+    if (curr_perm != &p)
+      delete curr_perm;
+  } // while
+  return false;
+}
+
+bool search_back_heuristic_cutoff(perm p, const string& dbname = "best_so_far.db") {
+  assert(is_perm(p));
+  const int n = p.size();
+  int n1_score = get_current_score(n-1, dbname);
+  const int p_score = do_all_top_swops_copy(p);
+  perm best(p);
+  int best_score = p_score;
+  vector<perm*> stack;
+  stack.push_back(&p);
+  while (!stack.empty()) {
+    perm* curr_perm = stack.back();
+    stack.pop_back();
+
+    assert(is_perm(*curr_perm));
+    int score = do_all_top_swops_copy(*curr_perm);
+
+    if (score > best_score) {
+      int diff = score - best_score;
+      best = *curr_perm;
+      best_score = score;
+      if (set_current_perm(n, best)) {
+        cout << "\nn = " << n << " improvement of " << diff << endl;
+        cout << "improved score = " << best_score << endl;
+        cout << " improved perm = " << best << endl;
+      }
+    }
+
+    // heuristic cut-off check
+    if (p.back() == n && n1_score + score < best_score) {
+      // don't add descendants
+    } else {
+      add_kids(curr_perm, stack);
+    }
     assert(is_perm(*curr_perm));
     if (curr_perm != &p)
       delete curr_perm;

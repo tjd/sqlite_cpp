@@ -1,4 +1,4 @@
-// topswop_perm.cpp
+// topswop_hc.cpp
 
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
@@ -74,24 +74,18 @@ void forever() {
   }
 }
 
-void test_perm() {
-  vector<int> deck(4);
-  init_deck(deck);
-  while (next_permutation(deck.begin(), deck.end())) {
-    cout << deck << endl;
+void test1() {
+  const int n = 71;
+  const int tries = 100000;
+  cout << "Topswop HC test n = " << n << ", tries = " << tries << endl;
+  for(int i = 0; i < tries; ++i) {
+    perm_ptr p(range(n));
+    shuffle(*p);
+    search_back_heuristic_cutoff(*p);
   }
-  cout << "done\n";
 }
 
- void test_one() {
-   const int n = 7;
-   const int restart = 5; //10000000;
-   cout << "\nTopswop Random Restart Permuter, n = " << n 
-        << ", restart = " << restart << endl;
-   try_all_perm_random_restart(n, restart, 15); // 1000000000);
- }
-
 int main() {
-  forever();
-  //test_one();
+  //forever();
+  test1();
 }
