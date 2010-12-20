@@ -8,10 +8,8 @@
 
 const string dbname = "best_so_far.db";
 
-
 int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
   int curr_best = get_current_score(n, dbname);
-  //cout << "curr_best = " << curr_best << endl;
   perm deck(n), best(n);
   init_deck(deck);
   shuffle_no_fix(deck);
@@ -33,22 +31,15 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
       cout << '.' << flush;
     }
 
-
     int count = do_all_top_swops_copy(deck);
-    //cout << "score(" << deck << ") = " << count << endl;
 
     if (count > highest_count_so_far) {
       highest_count_so_far = count;
       best = deck;
-      //      cout << "highest_count_so_far = " << highest_count_so_far << endl;
-      //      cout << best << endl;
       if (highest_count_so_far > curr_best) {
         cout << '!' << flush;
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
-//         cout << "\nn = " << n << ", score = " << curr_best 
-//              << " (" << diff << " improvement)" << endl
-//              << best << endl;
         set_current_perm(n, best, dbname);
         ensure_increasing_scores();
       }

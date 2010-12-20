@@ -1,23 +1,12 @@
 // topswop_prev_dfs.cpp
 
+// deprecated
+
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
 #define NDEBUG
 #include "topswop.h"
-
-// print the current stack contents; used for debugging
-void print_stack(const vector<perm*>& stack) {
-  if (stack.empty()) cout << "   <stack empty>" << endl;
-  else if (stack.size() == 1) cout << "   0: " << *stack[0] << endl;
-  else {
-    cout << "   0: " << *stack[0];
-    for(int i = 1; i < stack.size(); ++i) 
-      cout << "\n   " << i << ": " << *stack[i];
-    cout << endl;
-  }
-}
-
 
 perm* pop(vector<perm*>& stack) {
   assert(!stack.empty());
@@ -30,7 +19,7 @@ void random_start(perm* p) {
   if (!is_perm(*p)) error("*p must be a perm");
   if (p->front() != 1) error("perm must start with 1");
   random_shuffle(p->begin() + 1, p->end());
-  while (!has_home_num(p))
+  while (!has_some_home_num_skip_first(p))
     random_shuffle(p->begin() + 1, p->end());
   if (p->front() != 1) error("perm must start with 1");
 }

@@ -181,7 +181,7 @@ def list_current_best_scores(dbname = 'best_so_far.db'):
     total_score = 0
     for row in c:
         n, score, perm = row[0], row[1], row[2]
-        print '%2s  %4s' % (n, score)
+        print '%2s  %4s%s' % (n, score, ' *' if n in n_vals else '')
         total_score += score
     print '---------'    
     print '    %s' % total_score

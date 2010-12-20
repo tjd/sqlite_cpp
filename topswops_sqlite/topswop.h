@@ -35,6 +35,20 @@ const int n_vals[n_vals_size] = {
   73, 79, 83, 89, 97
 };
 
+
+// print the current stack contents; used for debugging
+void print_stack(const vector<perm*>& stack) {
+  if (stack.empty()) cout << "   <stack empty>" << endl;
+  else if (stack.size() == 1) cout << "   0: " << *stack[0] << endl;
+  else {
+    cout << "   0: " << *stack[0];
+    for(int i = 1; i < stack.size(); ++i) 
+      cout << "\n   " << i << ": " << *stack[i];
+    cout << endl;
+  }
+}
+
+
 // The STL reverse is pretty good: a by-hand reverse function was
 // slightly slower.
 int do_all_top_swops(perm& deck) {
@@ -105,7 +119,7 @@ int get_current_score(int n, const string& dbname = "best_so_far.db") {
     sql << "SELECT score FROM topswops WHERE n = " << n, into(score);
     return score;
   } catch (exception const &e) {
-    cerr << "Error: " << e.what() << '\n';
+    cerr << "Error accessing DB in get_current_score: " << e.what() << '\n';
   }
 }
 
@@ -132,7 +146,7 @@ perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
     
     return p;
   } catch (exception const &e) {
-    cerr << "Error: " << e.what() << '\n';
+    cerr << "Error accessing DB in get_current_perm: " << e.what() << '\n';
   }
 }
 
@@ -165,41 +179,52 @@ bool set_current_perm(int n, const perm& v,
     result = false;
     sql << "commit transaction";
   } catch (exception const &e) {
-    cerr << "Error: " << e.what() << '\n';
+    cerr << "Error accessing DB in set_current_perm: " << e.what() << '\n';
     result = false;
   }
   return result;
 }
 
-
-int count_home_skip_first(perm* p) {
+// Returns count of how many items in *p are in their home position.
+int count_home(perm* p, int start_index = 0) {
+  int i = start_index + 1;
   int count = 0;
-  int i = 2;
-  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
+  for(perm::iterator vp = p->begin() + start_index; vp < p->end(); ++vp) {
     if (*vp == i) ++count;
     ++i;
   }
   return count;
 }
 
-int has_home_num(perm* p) {
-  int i = 2;
-  for(perm::iterator vp = p->begin()+1; vp < p->end(); ++vp) {
+// Starting at index 1, returns count of how many items in *p are in
+// their home position.
+inline int count_home_skip_first(perm* p) {
+  return count_home(p, 1);
+}
+
+int has_some_home_num(perm* p, int start_index = 0) {
+  int i = start_index + 1;
+  for(perm::iterator vp = p->begin() + start_index; vp < p->end(); ++vp) {
     if (*vp == i) return true;
     ++i;
   }
   return false;
 }
 
+inline int has_some_home_num_skip_first(perm* p) {
+  return has_some_home_num(p, 1);
+}
+
+// Add all successors of v to stack.
 int add_kids(perm* v, vector<perm*>& stack) {
   assert(is_perm(*v));
 #ifndef NDEBUG
   perm vc(*v);
 #endif
   int count = 0;
-  int i = 1;
-  for(perm::iterator vp = v->begin(); vp < v->end(); ++vp) {
-    if (*vp == i && i != 1) {
+  int i = 2;
+  for(perm::iterator vp = v->begin()+1; vp < v->end(); ++vp) {
+    if (*vp == i) {
       perm* next_perm = new perm(*v);
       assert(is_perm(*next_perm));
       reverse(next_perm->begin(), next_perm->begin() + *vp);
@@ -213,7 +238,7 @@ int add_kids(perm* v, vector<perm*>& stack) {
   return count;
 }
 
-// generate a new permutation by searching backwards from p 
+// Generate a new permutation by searching backwards from p.
 //
 // TODO: probably has memory leaks; indeed failed with a std:bad_alloc
 // on one run
@@ -256,7 +281,6 @@ void improve_current_best_perms() {
     const int n = i; 
     perm_ptr p(get_current_perm(n));
     search_back(*p);
-    //delete p;
   }
 }
 
@@ -268,13 +292,12 @@ void ensure_increasing_scores() {
   for(int n = 3; n < 98; ++n) {
     int score = get_current_score(n);
     if (score < score_prev) {
-      perm_ptr perm_prev(get_current_perm(n-1));  // get the previous perm
+      perm_ptr perm_prev(get_current_perm(n-1));// get the previous perm
       perm perm_n = *perm_prev;                 // copy it
       perm_n.push_back(n);                      // append n
       search_back(perm_n);                      // any more improvement?
       set_current_perm(n, perm_n);              // save to DB
       score_prev = get_current_score(n);
-      //delete perm_prev;
     } else {
       score_prev = score;
     }
