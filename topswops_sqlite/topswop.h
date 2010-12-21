@@ -35,6 +35,8 @@ const int n_vals[n_vals_size] = {
 };
 
 
+inline void ping(char c) {cout << c << flush;}
+
 // print the current stack contents; used for debugging
 void print_stack(const vector<perm*>& stack) {
   if (stack.empty()) cout << "   <stack empty>" << endl;
@@ -110,6 +112,7 @@ void init_deck(perm& deck) {
   }
 }
 
+void ensure_increasing_scores();
 
 int get_current_score(int n, const string& dbname = "best_so_far.db") {
   try {
@@ -149,16 +152,14 @@ perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
   }
 }
 
-bool set_current_perm(int n, const perm& v, 
-                      const string& dbname = "best_so_far.db") {
-  //cout << "set_current_perm called ..." << endl;
-  bool result;
+bool set_current_perm_no_improve(int n, const perm& v, 
+                                 const string& dbname = "best_so_far.db") {
+  bool result = false;
   try {
     assert(n == v.size());
     assert(is_perm(v));
     session sql(sqlite3, dbname);
-    sql << "begin exclusive transaction";
-    //    const int curr_best_score = get_current_score(n, dbname);
+    //sql << "begin exclusive transaction";
     int curr_best_score;
     sql << "SELECT score FROM topswops WHERE n = " << n, into(curr_best_score);
     const int curr_score = do_all_top_swops_copy(v);
@@ -170,17 +171,24 @@ bool set_current_perm(int n, const perm& v,
       
       int score = -1;
       sql << "insert or replace into topswops(n, score, perm, date) "
-          << "values(" << n << ", " 
+          << "values(" 
+          << n << ", " 
           << curr_score << ", '" 
           << v << "', date('now'))";
       result = true;
-    }
-    result = false;
-    sql << "commit transaction";
+    } 
+    //sql << "commit transaction";
   } catch (exception const &e) {
     cerr << "Error accessing DB in set_current_perm: " << e.what() << '\n';
     result = false;
   }
+  return result;
+}
+
+bool set_current_perm(int n, const perm& v, 
+                      const string& dbname = "best_so_far.db") {
+  bool result = set_current_perm_no_improve(n, v, dbname);
+  if (result) ensure_increasing_scores();
   return result;
 }
 
@@ -275,7 +283,8 @@ bool search_back(perm p) {
   return false;
 }
 
-bool search_back_heuristic_cutoff(perm p, const string& dbname = "best_so_far.db") {
+bool search_back_heuristic_cutoff(perm p, int give_up_after, 
+                                  const string& dbname = "best_so_far.db") {
   assert(is_perm(p));
   const int n = p.size();
   int n1_score = get_current_score(n-1, dbname);
@@ -284,9 +293,19 @@ bool search_back_heuristic_cutoff(perm p, const string& dbname = "best_so_far.db
   int best_score = p_score;
   vector<perm*> stack;
   stack.push_back(&p);
+  int iter = 0;
   while (!stack.empty()) {
     perm* curr_perm = stack.back();
     stack.pop_back();
+
+    ++iter;
+    if (iter > give_up_after) {
+      delete curr_perm;
+      for(int i = 0; i < stack.size(); ++i) {
+        delete stack[i];
+      }
+      return false;
+    }
 
     assert(is_perm(*curr_perm));
     int score = do_all_top_swops_copy(*curr_perm);
@@ -335,7 +354,7 @@ void ensure_increasing_scores() {
       perm perm_n = *perm_prev;                 // copy it
       perm_n.push_back(n);                      // append n
       search_back(perm_n);                      // any more improvement?
-      set_current_perm(n, perm_n);              // save to DB
+      set_current_perm_no_improve(n, perm_n);   // save to DB
       score_prev = get_current_score(n);
     } else {
       score_prev = score;

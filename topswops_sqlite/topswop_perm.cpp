@@ -50,7 +50,7 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
         set_current_perm(n, best, dbname);
-        ensure_increasing_scores();
+        //ensure_increasing_scores();
       }
     }
   }

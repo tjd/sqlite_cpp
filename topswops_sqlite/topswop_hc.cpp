@@ -23,13 +23,13 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
 
     if (deck[0] == 1) {
       shuffle_no_fix(deck);
-      cout << '1' << flush;
+      ping('1');
     }
     ++count;
     if (count >= restart_at) {
       count = 0;
       shuffle_no_fix(deck);
-      cout << '.' << flush;
+      ping('.');
     }
 
     int score = do_all_top_swops_copy(deck);
@@ -39,18 +39,17 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
     // than the highest score so far.
     if (deck.back() == n && n1_score + score < highest_count_so_far) {
       shuffle_no_fix(deck);
-      cout << 'c' << flush;
+      ping('c');
     }
 
     if (score > highest_count_so_far) {
       highest_count_so_far = score;
       best = deck;
       if (highest_count_so_far > curr_best) {
-        cout << '!' << flush;
+        ping('!');
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
         set_current_perm(n, best, dbname);
-        ensure_increasing_scores();
       }
     }
   }
@@ -76,12 +75,15 @@ void forever() {
 
 void test1() {
   const int n = 71;
-  const int tries = 100000;
-  cout << "Topswop HC test n = " << n << ", tries = " << tries << endl;
+  const int tries = 10000 * 1000;
+  const int give_up_after = 10000000;
+  cout << "Topswop HC test n = " << n << ", tries = " << tries 
+       << ", give_up_after = " << give_up_after << endl;
   for(int i = 0; i < tries; ++i) {
     perm_ptr p(range(n));
     shuffle(*p);
-    search_back_heuristic_cutoff(*p);
+    search_back_heuristic_cutoff(*p, give_up_after);
+    //ping('.');
   }
 }
 
