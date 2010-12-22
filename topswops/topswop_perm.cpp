@@ -21,16 +21,19 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
     ++iterations;
     if (iterations >= stop_after) return highest_count_so_far;
 
+    ++count;
+
     if (deck[0] == 1) {
       shuffle_no_fix(deck);
-      cout << '1' << flush;
-    }
-    ++count;
-    if (count >= restart_at) {
       count = 0;
-      shuffle_no_fix(deck);
-      cout << '.' << flush;
+      ping('1');
     }
+
+//     if (count >= restart_at) {
+//       count = 0;
+//       shuffle_no_fix(deck);
+//       ping('.');
+//     }
 
     int score = do_all_top_swops_copy(deck);
 
@@ -38,15 +41,16 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
     // the previous perm's best score plus the current score is less
     // than the highest score so far.
     if (deck.back() == n && n1_score + score < highest_count_so_far) {
+      count = 0;
       shuffle_no_fix(deck);
-      cout << 'c' << flush;
+      ping('c');
     }
 
     if (score > highest_count_so_far) {
       highest_count_so_far = score;
       best = deck;
       if (highest_count_so_far > curr_best) {
-        cout << '!' << flush;
+        ping('!');
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
         set_current_perm(n, best, dbname);
@@ -64,8 +68,9 @@ void forever() {
   cout << "\nTopswop Random Restart Permuter, all n" 
        << ", restart = " << restart << endl;
   while (true) {
-    for(int i = 2; i < 98; ++i) {
-      const int n = i;
+    for(int i = 0; i < n_vals_size; ++i) {
+      const int n = n_vals[i];
+
       if (n > max_optimal_val) {
         cout << "(n=" << n << ")" << flush;
         try_all_perm_random_restart(n, restart, 1000000000);
