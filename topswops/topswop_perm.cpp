@@ -8,7 +8,7 @@
 
 const string dbname = "best_so_far.db";
 
-int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
+int try_all_perm_hc_random_restart(int n, int restart_at, int stop_after) {
   int curr_best = get_current_score(n, dbname);
   int n1_score = get_current_score(n-1, dbname);
   perm deck(n), best(n);
@@ -35,7 +35,7 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
 //       ping('.');
 //     }
 
-    int score = do_all_top_swops_copy(deck);
+    const int score = do_all_top_swops_hc_copy(deck, 1.5*n1_score);
 
     // Heuristic cut-off: if the last number is home, then re-start if
     // the previous perm's best score plus the current score is less
@@ -54,7 +54,6 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
         int diff = highest_count_so_far - curr_best;
         curr_best = highest_count_so_far;
         set_current_perm(n, best, dbname);
-        //ensure_increasing_scores();
       }
     }
   }
@@ -72,8 +71,10 @@ void forever() {
       const int n = n_vals[i];
 
       if (n > max_optimal_val) {
+        cout << "(n=" << n-1 << ")" << flush;
+        try_all_perm_hc_random_restart(n-1, restart, 1000000000);
         cout << "(n=" << n << ")" << flush;
-        try_all_perm_random_restart(n, restart, 1000000000);
+        try_all_perm_hc_random_restart(n, restart, 1000000000);
       }
     }
   }
@@ -93,7 +94,7 @@ void test_perm() {
    const int restart = 5; //10000000;
    cout << "\nTopswop Random Restart Permuter, n = " << n 
         << ", restart = " << restart << endl;
-   try_all_perm_random_restart(n, restart, 15); // 1000000000);
+   try_all_perm_hc_random_restart(n, restart, 15); // 1000000000);
  }
 
 int main() {

@@ -61,8 +61,25 @@ int do_all_top_swops(perm& deck) {
   return count;
 }
 
+int get_current_score(int n, const string& dbname);
+
+int do_all_top_swops_hc(perm& deck, int n1_score) {
+  const int n = deck.size();
+  int count = 0;
+  while (deck[0] != 1) {
+    if (deck.back() == n) return count + n1_score; 
+    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swop
+    ++count;
+  }
+  return count;
+}
+
 inline int do_all_top_swops_copy(perm deck) {
   return do_all_top_swops(deck);
+}
+
+inline int do_all_top_swops_hc_copy(perm deck, int n1_score) {
+  return do_all_top_swops_hc(deck, n1_score);
 }
 
 void fix_shuffle(perm& v) {
@@ -179,7 +196,8 @@ bool set_current_perm_no_improve(int n, const perm& v,
     } 
     //sql << "commit transaction";
   } catch (exception const &e) {
-    cerr << "Error accessing DB in set_current_perm: " << e.what() << '\n';
+    cerr << "Error accessing DB in set_current_perm_no_improve: " 
+         << e.what() << '\n';
     result = false;
   }
   return result;
