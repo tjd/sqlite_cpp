@@ -269,6 +269,7 @@ int add_kids(perm* v, vector<perm*>& stack) {
 // on one run
 // TODO: add a cut-off to abort the search after certain number of tries
 // TODO: decrease file I/O by passing in best n-val so far
+// TODO: avoid new/delete by using pre-defined static storage?
 bool search_back(perm p) {
   assert(is_perm(p));
   const int n = p.size();
