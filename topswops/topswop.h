@@ -34,9 +34,6 @@ const int n_vals[n_vals_size] = {
   73, 79, 83, 89, 97
 };
 
-
-inline void ping(char c) {cout << c << flush;}
-
 // print the current stack contents; used for debugging
 void print_stack(const vector<perm*>& stack) {
   if (stack.empty()) cout << "   <stack empty>" << endl;
@@ -381,5 +378,6 @@ void ensure_increasing_scores() {
   } // for
   improve_current_best_perms();
 }
+
 
 #endif

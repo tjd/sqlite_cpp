@@ -10,13 +10,6 @@ const bool show_n = false;
 
 const string dbname = "best_so_far.db";
 
-inline void rotate_left(int& a, int& b, int& c) {
-  int aa = a, bb = b, cc = c;
-  a = bb;
-  b = cc;
-  c = aa;
-}
-
 // inline int score_all_3rot(perm cpy, int i, int j, int k) {
 //   rotate_left(cpy[i], cpy[j], cpy[k]);
 //   int score1 = do_all_top_swops_copy(cpy);
@@ -432,24 +425,65 @@ void forever_hc() {
 }
 */
 
-void improve_current() {
-  cout << "improve_current() ..." << endl;
+void improve_current_all_pair_rot() {
+  cout << "improve_current_all_pair_rot() ..." << endl;
   for(int i = 14; i < 98; ++i) {
-    //    const int n = n_vals[i];
     const int n = i;
     cout << "(n = " << n << ")" << endl;
-    perm* p = get_current_perm(n);
+    perm_ptr p(get_current_perm(n));
     perm p_orig(*p);
     bool improved = false;
-    //while (next_perm_all_pair_rev(*p)) improved = true;
-    while (next_perm_all_pair_perm3(*p)) improved = true;
-    //while (next_perm_all_pair_rot(*p)) improved = true;
+    while (next_perm_all_pair_rot(*p)) improved = true;
     if (improved) {
       int diff = do_all_top_swops_copy(*p) - do_all_top_swops_copy(p_orig);
       cout << "Improvement of " << diff << " for n = " << n << endl;
       set_current_perm(n, *p);
     }
   }
+  cout << "... improve_current_all_pair_rot() done." << endl;
+}
+
+void improve_current_all_pair_perm3() {
+  cout << "improve_current_all_pair_perm3() ..." << endl;
+  for(int i = 14; i < 98; ++i) {
+    const int n = i;
+    cout << "(n = " << n << ")" << endl;
+    perm_ptr p(get_current_perm(n));
+    perm p_orig(*p);
+    bool improved = false;
+    while (next_perm_all_pair_perm3(*p)) improved = true;
+    if (improved) {
+      int diff = do_all_top_swops_copy(*p) - do_all_top_swops_copy(p_orig);
+      cout << "Improvement of " << diff << " for n = " << n << endl;
+      set_current_perm(n, *p);
+    }
+  }
+  cout << "... improve_current_all_pair_perm3() done." << endl;
+}
+
+void improve_current_all_pair_rev() {
+  cout << "improve_current_all_pair_rev() ..." << endl;
+  for(int i = 14; i < 98; ++i) {
+    const int n = i;
+    cout << "(n = " << n << ")" << endl;
+    perm_ptr p(get_current_perm(n));
+    perm p_orig(*p);
+    bool improved = false;
+    while (next_perm_all_pair_rev(*p)) improved = true;
+    if (improved) {
+      int diff = do_all_top_swops_copy(*p) - do_all_top_swops_copy(p_orig);
+      cout << "Improvement of " << diff << " for n = " << n << endl;
+      set_current_perm(n, *p);
+    }
+  }
+  cout << "... improve_current_all_pair_rev() done." << endl;
+}
+
+void improve_current() {
+  cout << "improve_current() ..." << endl;
+  improve_current_all_pair_rev();
+  improve_current_all_pair_perm3();
+  improve_current_all_pair_rot();
   cout << "... improve_current() done." << endl;
 }
 

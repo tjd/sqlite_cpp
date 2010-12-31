@@ -47,4 +47,18 @@ int str_to_int(const string& s) {
   return s[0] == '-' ? -total : total;
 }
 
+inline void rotate_left(int& a, int& b, int& c) {
+  int aa = a, bb = b, cc = c;
+  a = bb;
+  b = cc;
+  c = aa;
+}
+
+inline void ping(char c) {cout << c << flush;}
+
+void underline(const string& s, char c = '=') {
+  cout << s << '\n';
+  cout << string(s.size(), c) << endl;
+}
+
 #endif
