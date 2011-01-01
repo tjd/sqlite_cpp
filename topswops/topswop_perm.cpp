@@ -41,6 +41,7 @@ bool next_perm_all_pair_perm3(perm& p) {
       for(int k = j + 1; k < n; ++k) {
         perm cpy(p);
         rotate_left(cpy[i], cpy[j], cpy[k]);
+        search_back(cpy);
         assert(is_perm(cpy));
         int score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
@@ -49,10 +50,10 @@ bool next_perm_all_pair_perm3(perm& p) {
           k_best = k;
           best_score = score;
           best_perm = cpy;
-          search_back_heuristic_cutoff(best_perm, 1000);
           ping('?');
         }
         rotate_left(cpy[i], cpy[j], cpy[k]);
+        search_back(cpy);
         assert(is_perm(cpy));
         score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
@@ -61,10 +62,10 @@ bool next_perm_all_pair_perm3(perm& p) {
           k_best = k;
           best_score = score;
           best_perm = cpy;
-          search_back_heuristic_cutoff(best_perm, 1000);
           ping('?');
         }
         swap(cpy[i], cpy[j]);
+        search_back(cpy);
         assert(is_perm(cpy));
         score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
@@ -73,10 +74,10 @@ bool next_perm_all_pair_perm3(perm& p) {
           k_best = k;
           best_score = score;
           best_perm = cpy;
-          search_back_heuristic_cutoff(best_perm, 1000);
           ping('?');
         }
         rotate_left(cpy[i], cpy[j], cpy[k]);
+        search_back(cpy);
         assert(is_perm(cpy));
         score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
@@ -85,10 +86,10 @@ bool next_perm_all_pair_perm3(perm& p) {
           k_best = k;
           best_score = score;
           best_perm = cpy;
-          search_back_heuristic_cutoff(best_perm, 1000);
           ping('?');
         }
         rotate_left(cpy[i], cpy[j], cpy[k]);
+        search_back(cpy);
         assert(is_perm(cpy));
         score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
@@ -97,7 +98,6 @@ bool next_perm_all_pair_perm3(perm& p) {
           k_best = k;
           best_score = score;
           best_perm = cpy;
-          search_back_heuristic_cutoff(best_perm, 1000);
           ping('?');
         }      
       }
@@ -125,6 +125,7 @@ bool next_perm_all_pair_rot(perm& p) {
       for(int k = i; k < j; ++k) {
         perm cpy(p);
         rotate(cpy.begin() + i, cpy.begin() + k, cpy.begin() + j);
+        search_back(cpy);
         const int score = do_all_top_swops_copy(cpy);
         if (score > best_score) {
           i_best = i;
@@ -154,6 +155,7 @@ bool next_perm_all_pair_rev(perm& p) {
   for(int i = 0; i < n; ++i) {
     for(int j = i + 1; j < n; ++j) {
       reverse(p.begin() + i, p.begin() + j);
+      search_back(p);
       const int score = do_all_top_swops_copy(p);
       if (score > best_score) {
         i_best = i;
@@ -166,17 +168,15 @@ bool next_perm_all_pair_rev(perm& p) {
     }
   }
   if (i_best == -1) {
-    //    ping('-');
     return false;
   } else {
     reverse(p.begin() + i_best, p.begin() + j_best);
-    //    ping('+');
     return true;
   } 
 }
 
 // swap all (p[i-i], p[i]) and keep the one with the best improvement
-bool next_perm_all_pair(perm& p) {
+bool next_perm_all_pair_swap(perm& p) {
   const int n = p.size();
   int i_best = -1;
   int j_best = -1;
@@ -184,6 +184,7 @@ bool next_perm_all_pair(perm& p) {
   for(int i = 0; i < n; ++i) {
     for(int j = i + 1; j < n; ++j) {
       swap(p[i], p[j]);
+      search_back(p);
       const int score = do_all_top_swops_copy(p);
       if (score > best_score) {
         i_best = i;
@@ -479,8 +480,27 @@ void improve_current_all_pair_rev() {
   cout << "... improve_current_all_pair_rev() done." << endl;
 }
 
+void improve_current_all_pair_swap() {
+  cout << "improve_current_all_pair_swap() ..." << endl;
+  for(int i = 14; i < 98; ++i) {
+    const int n = i;
+    cout << "(n = " << n << ")" << endl;
+    perm_ptr p(get_current_perm(n));
+    perm p_orig(*p);
+    bool improved = false;
+    while (next_perm_all_pair_swap(*p)) improved = true;
+    if (improved) {
+      int diff = do_all_top_swops_copy(*p) - do_all_top_swops_copy(p_orig);
+      cout << "Improvement of " << diff << " for n = " << n << endl;
+      set_current_perm(n, *p);
+    }
+  }
+  cout << "... improve_current_all_pair_swap() done." << endl;
+}
+
 void improve_current() {
   cout << "improve_current() ..." << endl;
+  improve_current_all_pair_swap();
   improve_current_all_pair_rev();
   improve_current_all_pair_perm3();
   improve_current_all_pair_rot();
