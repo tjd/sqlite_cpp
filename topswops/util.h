@@ -20,6 +20,15 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
   }
   return os;
 }
+
+template<class T>
+bool operator==(const vector<T>& a, const vector<T>& b) {
+  if (a.size() != b.size()) return false;
+  for(int i = 0; i < a.size(); ++i) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
  
 string int_to_str(int n) {
   if (n == 0) return "0";

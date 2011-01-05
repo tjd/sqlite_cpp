@@ -6,7 +6,7 @@
 #define NDEBUG
 #include "topswop.h"
 
-const bool show_n = false;
+const bool show_n = true;
 
 const string dbname = "best_so_far.db";
 
@@ -276,10 +276,10 @@ int try_all_perm_random_restart(int n, int restart_at, int stop_after) {
   int iterations = 0;
   // while (next_perm_swap1(deck)) {
   //while (next_perm_rand_swap2(deck)) {
-  //while (next_permutation(deck.begin(), deck.end())) {
+  while (next_permutation(deck.begin(), deck.end())) {
   //while (next_perm_seq_pair(deck)) {
   //while (next_perm_all_pair(deck)) {
-  while (next_perm_all_pair_rev(deck)) {
+  //while (next_perm_all_pair_rev(deck)) {
     ++iterations;
     if (iterations >= stop_after) return highest_count_so_far;
 
@@ -528,5 +528,5 @@ void test_one() {
 
 int main() {
   improve_current();
-  //  forever();
+  //forever();
 }

@@ -14,7 +14,7 @@ topswop_grasp_ex: grasp.cpp topswop.h util.h
 # 	g++ -O3 topswop.cpp -o topswop_ex
 # 
 topswop_perm_ex: topswop_perm.cpp topswop.h util.h
-	g++ -O3 topswop_perm.cpp -o topswop_perm_ex -l soci_sqlite3-gcc-3_0
+	g++ -O2 -funroll-loops topswop_perm.cpp -o topswop_perm_ex -l soci_sqlite3-gcc-3_0
 
 topswop_hc_ex: topswop_hc.cpp topswop.h util.h
 	g++ -O3 topswop_hc.cpp -o topswop_hc_ex -l soci_sqlite3-gcc-3_0
