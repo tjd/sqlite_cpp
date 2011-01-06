@@ -1,4 +1,4 @@
-all: topswop_perm_ex topswop_sqlite_test_ex topswop_prev_dfs_ex node_test_ex topswop_hc_ex topswop_grasp_ex
+all: topswop_perm_ex topswop_sqlite_test_ex topswop_prev_dfs_ex node_test_ex topswop_hc_ex topswop_grasp_ex topswop_local_ex
 #all: topswop_ex topswop_perm_ex topswop_rev_ex topswop_prev_dfs_ex topswop_sqlite_test
 
 node_test_ex: node_test.cpp topswop.h util.h Node.h
@@ -15,6 +15,9 @@ topswop_grasp_ex: grasp.cpp topswop.h util.h
 # 
 topswop_perm_ex: topswop_perm.cpp topswop.h util.h
 	g++ -O2 -funroll-loops topswop_perm.cpp -o topswop_perm_ex -l soci_sqlite3-gcc-3_0
+
+topswop_local_ex: topswop_local.cpp topswop.h util.h
+	g++ -O3 topswop_local.cpp -o topswop_local_ex -l soci_sqlite3-gcc-3_0
 
 topswop_hc_ex: topswop_hc.cpp topswop.h util.h
 	g++ -O3 topswop_hc.cpp -o topswop_hc_ex -l soci_sqlite3-gcc-3_0
