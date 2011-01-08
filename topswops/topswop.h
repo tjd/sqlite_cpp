@@ -207,7 +207,7 @@ bool set_current_perm(int n, const perm& v,
   bool result = set_current_perm_no_improve(n, v, dbname);
   if (result) {
     ensure_increasing_scores();
-    improve_current();
+    //improve_current();
   }
   return result;
 }
@@ -365,15 +365,17 @@ void improve_current_best_perms() {
 
 // Each score from the 2nd onwards should be greater than the one just
 // before it. If not, construct a new permutation consisting of the
-// (higher scoring) previous one with n appended to the end.
+// reverse of the (higher scoring) previous one with n inserted on the
+// front.
 void ensure_increasing_scores() {
   int score_prev = get_current_score(2);
   for(int n = 3; n < 98; ++n) {
     int score = get_current_score(n);
-    if (score < score_prev) {
+    if (score <= score_prev) {
       perm_ptr perm_prev(get_current_perm(n-1));// get the previous perm
       perm perm_n = *perm_prev;                 // copy it
-      perm_n.push_back(n);                      // append n
+      reverse(perm_n.begin(), perm_n.end());    // reverse
+      perm_n.insert(perm_n.begin(), n);         // insert n at beginning
       search_back(perm_n);                      // any more improvement?
       set_current_perm_no_improve(n, perm_n);   // save to DB
       score_prev = get_current_score(n);
@@ -381,9 +383,8 @@ void ensure_increasing_scores() {
       score_prev = score;
     }
   } // for
-  improve_current_best_perms();
+  //improve_current_best_perms();
 }
-
 
 // permute all triples of p and keep the one with the best improvement
 bool next_perm_all_pair_perm3(perm& p) {

@@ -82,15 +82,89 @@ perm_score dfs(const perm& root, int cutoff_score, bool shuffle_stack = false,
   return best;
 }
 
-int main() {  
-  perm root(*range(97));
-  dfs(root, -1, true);
-  /*
-  for(int i = 0; i < 16; ++i) {
-    cout << "i=" << i << endl;
-    perm root(*get_current_perm(15));
-    root.insert(root.begin()+i, 16);
+void test1() { 
+  const int n = 97;
+  perm best(*get_current_perm(n));
+  perm root(best);
+  for(int i = 0; i < n; ++i) {
+    for(int j = i + 1; j < n; ++j) {
+      ping('.');   
+      reverse(root.begin() + i, root.begin() + j);
+      dfs(root, -1);  
+      reverse(root.begin() + i, root.begin() + j);
+    }
+  }
+}
+
+void test2() { 
+  const int n = 97;
+  perm best(*get_current_perm(n));
+  perm root(best);
+  for(int i = 0; i < 10000; ++i) {
+    next_permutation(root.begin(), root.end());
+    dfs(root, -1);  
+    ping('.');   
+  }
+}
+
+void test3() { 
+  const int n = 97;
+  perm best(*get_current_perm(n));
+  perm root(best);
+  for(int i = 0; i < 10000; ++i) {
+    ping('.');   
+    rotate(root.begin(), root.begin() + 1, root.end());
+    for(int j = 0; j < n; ++j) {
+      for(int k = j + 2; k < n; ++k) {
+        reverse(root.begin() + j, root.begin() + k);
+        dfs(root, -1);  
+        reverse(root.begin() + j, root.begin() + k);
+      }
+    }
+  }
+}
+
+void test4() {
+  const int n = 97;
+  int count = 0;
+  while (true) {
+    if (count > 1000000) {
+      ping('.');
+      count = 0;
+    }
+    perm root(*range(n));
+    random_shuffle(root.begin() + 1, root.end());
     dfs(root, -1);
   }
-  */
+}
+
+void test5() {
+  const int n = 97;
+  int count = 0;
+  perm root(*range(n));
+  int a = 0, b = 0;
+  while (a == b) {
+    a = randint(1, n);
+    b = randint(1, n);
+  }
+  swap(root[a], root[b]);  
+  dfs(root, -1);
+}
+
+void test6() {
+  const int n = 53;
+  perm best(*get_current_perm(n));
+  perm root(best);
+  do_all_top_swops(root);
+  cout << "root (n=" << n << "): " << root << endl;
+  dfs(root, -1);
+}
+
+int main() {
+  //test1();
+  //  test2();
+  //test3();
+  //  test4();
+  //test5();
+  test6();
 }

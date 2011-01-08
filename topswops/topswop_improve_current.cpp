@@ -6,5 +6,6 @@
 #include "topswop.h"
 
 int main() {
+  ensure_increasing_scores();
   improve_current();
 }
