@@ -33,7 +33,7 @@ inline bool cmp_perm_score(const perm_score& a, const perm_score& b) {
 
 // Assumes perm[0] == 1 and that the 
 // no depth limit if cutoff_score == -1
-perm_score dfs(const perm& root, int cutoff_score, int last_rev) {
+perm_score dfs(const perm& root, int cutoff_score) {
   assert(perm[0] == 1);
   const int n = root.size();
   int overall_best_score_for_n = get_current_score(n, dbname);
@@ -66,7 +66,7 @@ perm_score dfs(const perm& root, int cutoff_score, int last_rev) {
     if (new_score < cutoff_score || cutoff_score == -1) {
       for(int i = 1; i < n; ++i) {
         const int pi = p[i];
-        if (pi == i + 1 && pi != last_rev) { // does p[i] holds its home value?
+        if (pi == i + 1) { // does p[i] holds its home value?
           perm cpy(p);
           reverse(cpy.begin(), cpy.begin() + pi);
           stack.push_back(perm_score(cpy, new_score));
@@ -161,7 +161,7 @@ void test6() {
 // topswops. For each new permutation generated in this way, do
 // backwards dfs to try to find better scores.
 void test7() {
-  const int n = 97;
+  const int n = 83;
   perm p(*get_current_perm(n));
   int count = 0;
   while (p[0] != 1) {
@@ -169,16 +169,28 @@ void test7() {
     const int first = p[0];
     reverse(p.begin(), p.begin() + first);
     cout << "(n=" << n << ";" << count << ")" << flush;
-    dfs(p, -1, first);
+    dfs(p, -1);
   }
 }
 
-int main() {
-//test1();
-  //  test2();
-  //test3();
-  //  test4();
-  //test5();
-  //  test6();
-  test7();
+void back_dfs(int n = 97) {
+  perm p(*get_current_perm(n));
+  int count = 0;
+  while (p[0] != 1) {
+    ++count;
+    const int first = p[0];
+    reverse(p.begin(), p.begin() + first);
+    cout << "(n=" << n << ";" << count << ")" << flush;
+    dfs(p, -1);
+  }
+}
+
+int main(int argc, char* argv[]) {
+  int n = 97;
+  if (argc > 1) {
+    n = atoi(argv[1]);
+    if (n < 1 || n > 97) 
+      error("n must be in range [2, 97]");
+    back_dfs(n);
+  }
 }
