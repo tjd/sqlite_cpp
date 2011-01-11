@@ -1,4 +1,4 @@
-all: topswop_perm_ex topswop_sqlite_test_ex topswop_prev_dfs_ex node_test_ex topswop_hc_ex topswop_grasp_ex topswop_local_ex topswop_improve_ex topswop_dfs_ex
+all: topswop_perm_ex topswop_sqlite_test_ex topswop_prev_dfs_ex node_test_ex topswop_hc_ex topswop_grasp_ex topswop_local_ex topswop_improve_ex topswop_dfs_ex topswop_dfs2_ex
 #all: topswop_ex topswop_perm_ex topswop_rev_ex topswop_prev_dfs_ex topswop_sqlite_test
 
 node_test_ex: node_test.cpp topswop.h util.h Node.h
@@ -21,6 +21,9 @@ topswop_local_ex: topswop_local.cpp topswop.h util.h
 
 topswop_dfs_ex: topswop_dfs.cpp topswop.h util.h
 	g++ -O3 topswop_dfs.cpp -o topswop_dfs_ex -l soci_sqlite3-gcc-3_0
+
+topswop_dfs2_ex: topswop_dfs2.cpp topswop.h util.h
+	g++ -O3 topswop_dfs2.cpp -o topswop_dfs2_ex -l soci_sqlite3-gcc-3_0
 
 topswop_improve_ex: topswop_improve_current.cpp topswop.h util.h
 	g++ -O3 topswop_improve_current.cpp -o topswop_improve_ex -l soci_sqlite3-gcc-3_0
