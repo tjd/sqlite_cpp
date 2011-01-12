@@ -46,6 +46,11 @@ void print_stack(const vector<perm*>& stack) {
   }
 }
 
+const double good_pct = 0.999;
+
+inline string good_file(int n) {
+  return "good/" + int_to_str(n) + ".log";
+}
 
 // The STL reverse is pretty good: a by-hand reverse function was
 // slightly slower.
@@ -173,13 +178,12 @@ bool set_current_perm_no_improve(int n, const perm& v,
     assert(n == v.size());
     assert(is_perm(v));
     session sql(sqlite3, dbname);
-    //sql << "begin exclusive transaction";
-    int curr_best_score;
-    sql << "SELECT score FROM topswops WHERE n = " << n, into(curr_best_score);
+    int best_score;
+    sql << "SELECT score FROM topswops WHERE n = " << n, into(best_score);
     const int curr_score = do_all_top_swops_copy(v);
-    if (curr_score > curr_best_score) {
-      cout << "n = " << n << " improvement = " 
-           << (curr_score - curr_best_score) << ", " << dbname << endl;
+    if (curr_score > best_score) {
+      cout << "n = " << n << ": improvement = " 
+           << (curr_score - best_score) << ", " << dbname << endl;
       cout << "score = " << curr_score << endl;
       cout << "perm = " << v << endl << endl;
       
@@ -191,7 +195,6 @@ bool set_current_perm_no_improve(int n, const perm& v,
           << v << "', date('now'))";
       result = true;
     } 
-    //sql << "commit transaction";
   } catch (exception const &e) {
     cerr << "Error accessing DB in set_current_perm_no_improve: " 
          << e.what() << '\n';

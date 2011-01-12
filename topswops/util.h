@@ -6,6 +6,7 @@
 #include "std_lib_facilities_ubuntu_regvec.h"
 #include <assert.h>
 #include <memory>
+#include <set>
 
 string sep = ", ";
 

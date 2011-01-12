@@ -35,6 +35,8 @@ inline bool cmp_perm_score(const perm_score& a, const perm_score& b) {
 // no depth limit if cutoff_score == -1
 perm_score dfs(const perm& root, int cutoff_score) {
   assert(perm[0] == 1);
+  set<perm> good_perms;
+  int prev_good_perms_size = 0;
   const int n = root.size();
   int overall_best_score_for_n = get_current_score(n, dbname);
   vector<perm_score> stack;
@@ -59,8 +61,17 @@ perm_score dfs(const perm& root, int cutoff_score) {
       if (best_score > overall_best_score_for_n) {
         set_current_perm(n, best.get_perm());
         overall_best_score_for_n = best_score;
-      }
+      } 
+    } else if (good_pct * overall_best_score_for_n <= ps_score) {
+      //      good_perms.insert(good_perms.begin(), ps.get_perm());
+      //      if (good_perms.size() > prev_good_perms_size) {
+        prev_good_perms_size = good_perms.size();
+        ofstream fout(good_file(n).c_str(), ios::app);
+        fout << ps.get_perm() << '\n';
+        ping('=');
+        //      }
     }
+    //  }
 
     // add p's children to the stack
     if (new_score < cutoff_score || cutoff_score == -1) {
@@ -76,86 +87,6 @@ perm_score dfs(const perm& root, int cutoff_score) {
   } // while
   return best;
 }
-
-/*
-void test1() { 
-  const int n = 97;
-  perm best(*get_current_perm(n));
-  perm root(best);
-  for(int i = 0; i < n; ++i) {
-    for(int j = i + 1; j < n; ++j) {
-      ping('.');   
-      reverse(root.begin() + i, root.begin() + j);
-      dfs(root, -1);  
-      reverse(root.begin() + i, root.begin() + j);
-    }
-  }
-}
-
-void test2() { 
-  const int n = 97;
-  perm best(*get_current_perm(n));
-  perm root(best);
-  for(int i = 0; i < 10000; ++i) {
-    next_permutation(root.begin(), root.end());
-    dfs(root, -1);  
-    ping('.');   
-  }
-}
-
-void test3() { 
-  const int n = 97;
-  perm best(*get_current_perm(n));
-  perm root(best);
-  for(int i = 0; i < 10000; ++i) {
-    ping('.');   
-    rotate(root.begin(), root.begin() + 1, root.end());
-    for(int j = 0; j < n; ++j) {
-      for(int k = j + 2; k < n; ++k) {
-        reverse(root.begin() + j, root.begin() + k);
-        dfs(root, -1);  
-        reverse(root.begin() + j, root.begin() + k);
-      }
-    }
-  }
-}
-
-void test4() {
-  const int n = 97;
-  int count = 0;
-  while (true) {
-    if (count > 1000000) {
-      ping('.');
-      count = 0;
-    }
-    perm root(*range(n));
-    random_shuffle(root.begin() + 1, root.end());
-    dfs(root, -1);
-  }
-}
-
-void test5() {
-  const int n = 97;
-  int count = 0;
-  perm root(*range(n));
-  int a = 0, b = 0;
-  while (a == b) {
-    a = randint(1, n);
-    b = randint(1, n);
-  }
-  swap(root[a], root[b]);  
-  dfs(root, -1);
-}
-
-void test6() {
-  const int n = 53;
-  perm best(*get_current_perm(n));
-  perm root(best);
-  do_all_top_swops(root);
-  cout << "root (n=" << n << "): " << root << endl;
-  dfs(root, -1);
-}
-*/
 
 // Idea: Start with a known good permutation, and do forward
 // topswops. For each new permutation generated in this way, do
