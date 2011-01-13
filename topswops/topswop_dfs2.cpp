@@ -136,8 +136,25 @@ void test8() {
   cout << count << " good permutations read\n";
 }
 
+// read perms from the "good" log files and try back_dfs on them
+void test_good_perm(int n) {
+  ifstream ifs(good_file(n).c_str());
+  string line;
+  int count = 0;
+  while (getline(ifs, line)) {
+    perm_ptr p(convert_to_perm(n, line));
+    cout << "\n[n=" << n << ";" << count << "]" << endl;
+    back_dfs(*p, 50);
+    ++count;
+  }
+  cout << count << " good permutations read\n";
+}
+
 int main() {
-  test8();
+  //  test8();
+  for(int n = 23; n < 98; ++n) {
+    test_good_perm(n);
+  }
 }
 
 /*

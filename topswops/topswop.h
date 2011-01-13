@@ -197,6 +197,9 @@ bool set_current_perm_no_improve(int n, const perm& v,
           << n << ", " 
           << curr_score << ", '" 
           << v << "', date('now'))";
+
+      ofstream ofs("best.log", ios::app);
+      ofs << v << endl;
       result = true;
     } 
   } catch (exception const &e) {
