@@ -47,6 +47,7 @@ void print_stack(const vector<perm*>& stack) {
 }
 
 const double good_pct = 0.999;
+const bool good_logging = false;
 
 inline string good_file(int n) {
   return "good/" + int_to_str(n) + ".log";
@@ -144,18 +145,12 @@ int get_current_score(int n, const string& dbname = "best_so_far.db") {
   }
 }
 
-perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
-  try {
-    session sql(sqlite3, dbname);
-    string s;
-    sql << "SELECT perm FROM topswops WHERE n = " << n, into(s);
-
+// convert a comma-separated n-permutation string to a perm
+perm* convert_to_perm(int n, string s) {
     // replace every ',' with a space
     for(int i = 0; i < s.size(); ++i) {
       if (s[i] == ',') s[i] = ' ';
     }
-    
-    // convert all the numbers on s to ints
     perm* p = new perm(n);
     istringstream iss(s);
     int num = -1;
@@ -166,6 +161,15 @@ perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
     }
     
     return p;
+}
+
+perm* get_current_perm(int n, const string& dbname = "best_so_far.db") {
+  try {
+    session sql(sqlite3, dbname);
+    string s;
+    sql << "SELECT perm FROM topswops WHERE n = " << n, into(s);
+
+    return convert_to_perm(n, s);
   } catch (exception const &e) {
     cerr << "Error accessing DB in get_current_perm: " << e.what() << '\n';
   }

@@ -62,17 +62,15 @@ perm_score dfs(const perm& root, int cutoff_score) {
         set_current_perm(n, best.get_perm());
         overall_best_score_for_n = best_score;
       } 
-    } else if (good_pct * overall_best_score_for_n <= ps_score) {
+    } else if (good_logging && good_pct * overall_best_score_for_n <= ps_score) {
       //      good_perms.insert(good_perms.begin(), ps.get_perm());
       //      if (good_perms.size() > prev_good_perms_size) {
-        prev_good_perms_size = good_perms.size();
-        ofstream fout(good_file(n).c_str(), ios::app);
-        fout << ps.get_perm() << '\n';
-        ping('=');
-        //      }
+      prev_good_perms_size = good_perms.size();
+      ofstream fout(good_file(n).c_str(), ios::app);
+      fout << ps.get_perm() << '\n';
+      ping('=');
     }
-    //  }
-
+    
     // add p's children to the stack
     if (new_score < cutoff_score || cutoff_score == -1) {
       for(int i = 1; i < n; ++i) {
@@ -104,11 +102,13 @@ void test7() {
   }
 }
 
-void back_dfs(int n = 97) {
-  perm p(*get_current_perm(n));
+void back_dfs(const perm& raw_perm, int stop_after = -1) {
+  const int n = raw_perm.size();
+  perm p(raw_perm);
   int count = 0;
   while (p[0] != 1) {
     ++count;
+    if (stop_after != -1 && count >= stop_after) return;
     const int first = p[0];
     reverse(p.begin(), p.begin() + first);
     cout << "(n=" << n << ";" << count << ")" << flush;
@@ -116,6 +116,31 @@ void back_dfs(int n = 97) {
   }
 }
 
+void back_dfs(int n = 97) {
+  back_dfs(*get_current_perm(n));
+}
+
+
+// read perms from the "good" log files and try back_dfs on them
+void test8() {
+  const int n = 97;
+  ifstream ifs(good_file(n).c_str());
+  string line;
+  int count = 0;
+  while (getline(ifs, line)) {
+    perm_ptr p(convert_to_perm(n, line));
+    cout << "\n[" << count << "]" << endl;
+    back_dfs(*p, 100);
+    ++count;
+  }
+  cout << count << " good permutations read\n";
+}
+
+int main() {
+  test8();
+}
+
+/*
 int main(int argc, char* argv[]) {
   int n = 97;
   if (argc > 1) {
@@ -125,3 +150,4 @@ int main(int argc, char* argv[]) {
     back_dfs(n);
   }
 }
+*/
