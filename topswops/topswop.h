@@ -190,6 +190,9 @@ bool set_current_perm_no_improve(int n, const perm& v,
            << (curr_score - best_score) << ", " << dbname << endl;
       cout << "score = " << curr_score << endl;
       cout << "perm = " << v << endl << endl;
+
+      ofstream ofs("best.log", ios::app);
+      ofs << v << endl;
       
       int score = -1;
       sql << "insert or replace into topswops(n, score, perm, date) "
@@ -198,8 +201,6 @@ bool set_current_perm_no_improve(int n, const perm& v,
           << curr_score << ", '" 
           << v << "', date('now'))";
 
-      ofstream ofs("best.log", ios::app);
-      ofs << v << endl;
       result = true;
     } 
   } catch (exception const &e) {
