@@ -150,14 +150,15 @@ void test_good_perm(int n) {
   cout << count << " good permutations read\n";
 }
 
+/*
 int main() {
   //  test8();
   for(int n = 23; n < 98; ++n) {
     test_good_perm(n);
   }
 }
+*/
 
-/*
 int main(int argc, char* argv[]) {
   int n = 97;
   if (argc > 1) {
@@ -167,4 +168,4 @@ int main(int argc, char* argv[]) {
     back_dfs(n);
   }
 }
-*/
+
