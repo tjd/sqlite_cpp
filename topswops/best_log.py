@@ -5,7 +5,7 @@ logfile = 'best.log'
 
 def str_to_perm(line):
     return [int(s) for s in line.split(', ')]
-
+        
 def perm_score(perm):
     count = 0
     while perm[0] != 1:
@@ -15,7 +15,7 @@ def perm_score(perm):
         perm = top + perm[f:]
         count += 1
     return count
-
+ 
 def append_best_db_to_best_log():
     f = open(logfile, 'a')
     conn = sqlite3.connect('best_so_far.db')
@@ -38,7 +38,7 @@ def db_test():
         score = perm_score(perm)
         print 'n = %s, %s\n%s' % (n, score, perm)
 
-def main():
+def list_logfile():
     st = os.stat(logfile)
     f = open(logfile, 'r')
     best = {}
@@ -63,6 +63,6 @@ def main():
     print '   %s lines' % count
 
 if __name__ == '__main__':
-    main()
+    list_logfile()
     #db_test()
     #append_best_db_to_best_log()

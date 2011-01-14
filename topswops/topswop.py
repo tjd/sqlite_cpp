@@ -1,10 +1,6 @@
 # topswop.py
 
-import random
-import os
-import sys
-import sqlite3
-import re
+import random, time, os, sys, sqlite3, re
 
 n_vals = [  2,  3,  5,  7, 11, 
            13, 17, 19, 23, 29, 
@@ -12,23 +8,8 @@ n_vals = [  2,  3,  5,  7, 11,
            53, 59, 61, 67, 71,
            73, 79, 83, 89, 97];
 
-# def make_file_name(n):
-#     return 'best_so_far/topswop_num_%s.txt' % n
-# 
-# def make_all_num_files():
-#     print 'Are you you want to do this?'
-#     print 'All existing number files will be deleted!'
-#     r = random.randint(100, 1000)
-#     ans = raw_input('Enter %s to go ahead: ' % r)
-#     if ans != str(r):
-#         print 'Wrong number: nothing done'
-#         return
-#     
-#     for n in n_vals:
-#         f = open(make_file_name(n), 'w')
-#         f.write('0\n')
-#         f.write(', '.join(str(i) for i in range(1, n+1)))
-# 
+logfile = 'best.log'
+
 def perm_score(perm):
     count = 0
     while perm[0] != 1:
@@ -86,7 +67,7 @@ def make_test_db():
 #     conn.commit()
 #     conn.close()
 #     check_db_okay()
-# 
+ 
 def get_db_row(n, dbname = 'best_so_far.db'):
     """ Retrieve the best score so far for n.
     """
@@ -95,7 +76,7 @@ def get_db_row(n, dbname = 'best_so_far.db'):
     c.execute('select * from topswops where n = %s' % n)
     return c.fetchone()
 
-def perm_str_to_list(s):
+def str_to_perm(s):
     return [int(i) for i in s.split(', ')]
 
 def is_perm(lst):
@@ -117,7 +98,7 @@ def check_db_okay(dbname = 'best_so_far.db'):
         if score < 0:
             print 'Error: score = %s is too small (score >= 0)' % score
             error_count += 1
-        lst = perm_str_to_list(perm)
+        lst = str_to_perm(perm)
         if not is_perm(lst):
             print 'Error: not a perm: %s' % perm
             error_count += 1
@@ -136,14 +117,6 @@ def check_db_okay(dbname = 'best_so_far.db'):
         return False
         
 
-#def get_num_file(n):
-#     assert n in n_vals
-#     f = open(make_file_name(n), 'r')
-#     score = int(f.next())
-#     perm = [int(i) for i in f.next().split(', ')]
-#     assert score == perm_score(perm), '%s\nscore = %s, perm_score = %s' % (perm, score, perm_score(perm))
-#     return score, perm
-# 
 def gen_num_report(dbname = 'best_so_far.db'):
     """ Assumes DB has a table called topswops with this schema:
 
@@ -186,6 +159,41 @@ def list_current_best_scores(dbname = 'best_so_far.db'):
     print '---------'    
     print '    %s' % total_score
 
+def append_best_db_to_best_log():
+    f = open(logfile, 'a')
+    conn = sqlite3.connect('best_so_far.db')
+    c = conn.cursor()
+    c.execute('SELECT perm FROM topswops')
+    for r in c:
+        perm = str_to_perm(r[0])
+        n = max(perm)
+        score = perm_score(perm)
+        print 'n = %s, %s\n%s' % (n, score, perm)
+        f.write(r[0] + '\n')    
+
+def list_logfile():
+    st = os.stat(logfile)
+    f = open(logfile, 'r')
+    best = {}
+    count = 0
+    for line in f:
+        count += 1
+        perm = str_to_perm(line)
+        n = max(perm)
+        score = perm_score(perm)
+        if n not in best:
+            best[n] = perm
+        elif score > perm_score(best[n]):
+            best[n] = perm
+    lst = [(n, best[n], perm_score(best[n])) for n in best]
+    lst.sort()
+    for n, p, score in lst:
+        print 'n = %s, %s\n%s' % (n, score, p)
+    total_score = sum(score for n, perm, score in lst)
+    print '   Total score = %s' % total_score
+    print '   "%s" last modified: %s' % (logfile,
+                                         time.asctime(time.localtime(st[-2])))
+    print '   %s lines' % count
 
 if __name__ == '__main__':
     params = sys.argv[1:]
@@ -199,8 +207,9 @@ if __name__ == '__main__':
         check_db_okay()
     elif params[0] == 'maketestdb':
         make_test_db()
-#     elif params[0] == 'addnoprimes':
-#         add_no_primes()
-# 
-#    elif params[0] == 'transfer':
-#        transfer_file_to_db()
+    elif params[0] == 'append_best_db_to_log':
+        append_best_db_to_best_log()
+    elif params[0] == 'list_log':
+        list_logfile()
+    else:
+        print 'Error: unknown command-line parameters'

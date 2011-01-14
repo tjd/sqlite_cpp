@@ -153,7 +153,7 @@ void test_good_perm(int n) {
 /*
 int main() {
   //  test8();
-  for(int n = 23; n < 98; ++n) {
+  for(int n = 36; n < 98; ++n) {
     test_good_perm(n);
   }
 }
