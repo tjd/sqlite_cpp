@@ -1,0 +1,201 @@
+// topswop_cilk.cilk
+
+// See http://azspcs.net/Contest/Cards
+// Contest ends: Feb. 12 2011, 4pm
+
+//#define NDEBUG
+
+// cilk_for granularity.
+#define CILK_FOR_GRAINSIZE 50
+
+#include <cilk_mutex.h>
+#include <reducer_opadd.h>
+#include "util.h"
+using namespace std;
+
+typedef vector<int> perm;
+typedef auto_ptr<perm> perm_ptr;
+
+const bool show_n = false;
+
+// returns a pointer to a new vector<int> initialized to 1, 2, ..., n
+perm* range(int n) {
+  perm* v = new perm(n);
+  int i = 1;
+  for(perm::iterator p = v->begin(); p < v->end(); ++p) {
+    *p = i;
+    ++i;
+  }
+  return v;
+}
+
+// The STL reverse is pretty good: a by-hand reverse function was
+// slightly slower.
+int do_all_top_swops(perm& deck) {
+  int count = 0;
+  while (deck[0] != 1) {
+    reverse(deck.begin(), deck.begin() + deck[0]);  // do 1 top-swop
+    ++count;
+  }
+  return count;
+}
+
+inline int do_all_top_swops_copy(perm deck) {
+  return do_all_top_swops(deck);
+}
+
+inline string logfile(int n) {
+  assert(n >= 14 && n <= 97);
+  return "log/" + to_string(n) + ".log";
+}
+
+void random_guesser(const int n, const int cutoff = 10000, 
+                    const int ping_after = 100000) {
+  assert(n >= 14 && n <= 97);
+  ofstream log(logfile(n).c_str(), ios::app);
+
+  // init p and best_score
+  //  const perm_ptr p(range(n));
+  perm p(n);
+  for(int i = 0; i < n; ++i) p[i] = i + 1;
+  int best_score = -1;
+  for(int i = 0; i < cutoff; ++i) {
+    random_shuffle(p.begin(), p.end());
+    const int score = do_all_top_swops_copy(p);
+    if (score > best_score) {
+      best_score = score;
+      log << p << endl;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////
+
+class perm_score {
+public:
+  perm_score(const perm& pp):  
+    p(pp), score(do_all_top_swops_copy(p)) {}
+
+  perm_score(const perm& pp, int s_score):
+    p(pp), score(s_score) {}
+
+  perm get_perm() const {return p;}
+  int get_score() const {return score;}
+
+private:
+  perm p;
+  int score;
+};
+
+inline bool cmp_perm_score(const perm_score& a, const perm_score& b) {
+  return a.get_score() < b.get_score();
+}
+
+
+// Assumes perm[0] == 1 and that the 
+// no depth limit if cutoff_score == -1
+perm_score dfs(const perm& root, int cutoff_score) {
+  //assert(root[0] == 1);
+  const int n = root.size();
+  ofstream log(logfile(n).c_str(), ios::app);
+  int overall_best_score_for_n = -1;
+  vector<perm_score> stack;
+  perm_score best(root);
+  stack.push_back(best);
+  int count = 0;
+  while (!stack.empty()) {
+    ++count;
+    perm_score ps = stack.back();
+    stack.pop_back();
+    const perm p = ps.get_perm();
+    const int ps_score = ps.get_score();
+    const int new_score = ps_score + 1;
+    if (ps_score > best.get_score()) {
+      best = ps;
+      const int best_score = best.get_score();
+      if (show_n)
+        cout << "n=" << n << ", best (" << best_score
+             <<  "/" << overall_best_score_for_n << "): " 
+             << best.get_perm() 
+             << endl;
+      if (best_score > overall_best_score_for_n) {
+        log << best.get_perm();
+        overall_best_score_for_n = best_score;
+      } 
+    } 
+    
+    // add p's children to the stack
+    if (new_score < cutoff_score || cutoff_score == -1) {
+      for(int i = 1; i < n; ++i) {
+        const int pi = p[i];
+        if (pi == i + 1) { // does p[i] holds its home value?
+          perm cpy(p);
+          reverse(cpy.begin(), cpy.begin() + pi);
+          stack.push_back(perm_score(cpy, new_score));
+        } // if
+      } // for
+    } // if
+  } // while
+  return best;
+}
+
+void back_dfs(const perm& raw_perm, int stop_after = -1) {
+  const int n = raw_perm.size();
+  perm p(raw_perm);
+  int count = 0;
+  while (p[0] != 1) {
+    ++count;
+    if (stop_after != -1 && count >= stop_after) return;
+    const int first = p[0];
+    reverse(p.begin(), p.begin() + first);
+    cout << "(n=" << n << ";" << count << ")" << flush;
+    dfs(p, -1);
+  }
+}
+
+
+void test1() {
+  random_guesser(97);
+}
+
+void test2() {
+  // fastest with 1 worker??
+  cilk_for(int n = 14; n < 98; ++n) {
+    random_guesser(n);
+  }
+  cout << "\nAll done!" << endl;
+}
+
+void test3() {
+  // fastest with 1 worker??
+  for(int n = 14; n < 98; ++n) {
+    cilk_spawn random_guesser(n);
+  }
+  cilk_sync;
+  cout << "\nAll done!" << endl;
+}
+
+void test4() {
+  cout << "test4() initializing ..." << endl;
+  vector<perm*> roots;
+  for(int n = 14; n < 98; ++n) {
+    roots.push_back(range(n));
+  }
+  for(int i = 0; i < roots.size(); ++i) {
+    random_shuffle(roots[i]->begin(), roots[i]->end());
+  }
+
+  const int sz = roots.size(); 
+  cout << "test4() searching " << sz << " roots ..." << endl; 
+  cilk_for(int i = 0; i < sz; ++i) {
+    back_dfs(*roots[i], 10);
+  }
+  cout << "\nAll done!" << endl;
+}
+
+
+// requied by cilk
+int cilk_main() {
+  srand(time(NULL));
+  test4();
+}

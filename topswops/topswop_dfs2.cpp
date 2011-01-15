@@ -150,15 +150,35 @@ void test_good_perm(int n) {
   cout << count << " good permutations read\n";
 }
 
-/*
-int main() {
-  //  test8();
-  for(int n = 36; n < 98; ++n) {
-    test_good_perm(n);
+void test9() {
+  cout << "test9() initializing ..." << endl;
+  vector<perm*> roots;
+  for(int n = 14; n < 98; ++n) {
+    roots.push_back(range(n));
   }
-}
-*/
+  for(int i = 0; i < roots.size(); ++i) {
+    random_shuffle(roots[i]->begin(), roots[i]->end());
+  }
 
+  const int sz = roots.size(); 
+  cout << "test4() searching " << sz << " roots ..." << endl; 
+  for(int i = 0; i < sz; ++i) {
+    back_dfs(*roots[i], 20);
+  }
+  cout << "\ntest9 done!" << endl;
+}
+
+
+
+int main() {
+  for(;;) test9();
+//  for(int n = 36; n < 98; ++n) {
+//    test_good_perm(n);
+//  }
+}
+
+
+/*
 int main(int argc, char* argv[]) {
   int n = 97;
   if (argc > 1) {
@@ -168,4 +188,4 @@ int main(int argc, char* argv[]) {
     back_dfs(n);
   }
 }
-
+*/
