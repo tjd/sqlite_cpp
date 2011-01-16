@@ -637,9 +637,9 @@ bool next_perm_swap1(perm& p) {
 
 void improve_current_all_pair_rot() {
   cout << "improve_current_all_pair_rot() ..." << endl;
-  for(int i = 14; i < 98; ++i) {
-    const int n = i;
-    cout << "(n = " << n << ")" << endl;
+  //#pragma omp parallel for schedule(static)
+  for(int n = 14; n < 98; ++n) {
+    ping_n(n);
     perm_ptr p(get_current_perm(n));
     perm p_orig(*p);
     bool improved = false;
@@ -655,9 +655,9 @@ void improve_current_all_pair_rot() {
 
 void improve_current_all_pair_perm3() {
   cout << "improve_current_all_pair_perm3() ..." << endl;
-  for(int i = 14; i < 98; ++i) {
-    const int n = i;
-    cout << "(n = " << n << ")" << endl;
+  //#pragma omp parallel for schedule(static)
+  for(int n = 14; n < 98; ++n) {
+    ping_n(n);
     perm_ptr p(get_current_perm(n));
     perm p_orig(*p);
     bool improved = false;
@@ -673,9 +673,9 @@ void improve_current_all_pair_perm3() {
 
 void improve_current_all_pair_rev() {
   cout << "improve_current_all_pair_rev() ..." << endl;
-  for(int i = 14; i < 98; ++i) {
-    const int n = i;
-    cout << "(n = " << n << ")" << endl;
+  //#pragma omp parallel for schedule(dynamic, 10)
+  for(int n = 14; n < 98; ++n) {
+    ping_n(n);
     perm_ptr p(get_current_perm(n));
     perm p_orig(*p);
     bool improved = false;
@@ -691,9 +691,9 @@ void improve_current_all_pair_rev() {
 
 void improve_current_all_pair_swap() {
   cout << "improve_current_all_pair_swap() ..." << endl;
-  for(int i = 14; i < 98; ++i) {
-    const int n = i;
-    cout << "(n = " << n << ")" << endl;
+  //#pragma omp parallel for schedule(dynamic, 10)
+  for(int n = 14; n < 98; ++n) {
+    ping_n(n);
     perm_ptr p(get_current_perm(n));
     perm p_orig(*p);
     bool improved = false;
@@ -709,10 +709,16 @@ void improve_current_all_pair_swap() {
 
 void improve_current() {
   cout << "improve_current() ..." << endl;
-  improve_current_all_pair_swap();
-  improve_current_all_pair_rev();
-  improve_current_all_pair_perm3();
-  improve_current_all_pair_rot();
+  #pragma omp parallel sections
+  {
+     improve_current_all_pair_rot();
+     #pragma omp section
+     improve_current_all_pair_perm3();
+     #pragma omp section
+     improve_current_all_pair_swap();
+     #pragma omp section
+     improve_current_all_pair_rev();   
+  }
   cout << "... improve_current() done." << endl;
 }
 

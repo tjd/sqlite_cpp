@@ -161,7 +161,9 @@ void test9() {
   }
 
   const int sz = roots.size(); 
-  cout << "test4() searching " << sz << " roots ..." << endl; 
+  cout << "searching " << sz << " roots ..." << endl; 
+
+  #pragma omp parallel for
   for(int i = 0; i < sz; ++i) {
     back_dfs(*roots[i], 20);
   }
@@ -169,14 +171,13 @@ void test9() {
 }
 
 
-
 int main() {
-  for(;;) test9();
-//  for(int n = 36; n < 98; ++n) {
-//    test_good_perm(n);
-//  }
+  //  test9();
+  #pragma omp parallel for
+  for(int n = 58; n < 98; ++n) {
+    test_good_perm(n);
+  }
 }
-
 
 /*
 int main(int argc, char* argv[]) {
