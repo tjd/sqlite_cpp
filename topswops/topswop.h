@@ -55,6 +55,7 @@ class Topswop {
       s = other.s;
       score_up_to_date = score_up_to_date;
     }
+    return *this;
   }
 
   //destructor

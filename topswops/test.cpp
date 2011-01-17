@@ -3,7 +3,7 @@
 #include "topswop.h"
 
 int main() {
-  srand(1);
+  srand(2);
   cout << "Running test ..." << endl;
   Topswop p(10);
   cout << "p.size() == " << p.size() << endl;

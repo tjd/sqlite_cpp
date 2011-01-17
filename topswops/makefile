@@ -1,6 +1,6 @@
 #all: topswop_perm_ex topswop_improve_ex topswop_dfs_ex topswop_dfs2_ex
  
-test_ex: topswop.h
+test_ex: test.cpp topswop.h
 	g++ -O3 test.cpp -o test_ex
 
 #topswop_dfs2_ex: dfs2.cpp topswop.h util.h
