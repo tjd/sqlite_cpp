@@ -1,10 +1,10 @@
-// topswop.h
+// topswop_old.h
 
 // See http://azspcs.net/Contest/Cards
 // Contest ends: Feb. 12 2011, 4pm
 
-#ifndef TOP_SWOP_H
-#define TOP_SWOP_H 201012L
+#ifndef TOP_SWOP_OLD_H
+#define TOP_SWOP_OLD_H 201012L
 
 #include "util.h"
 #include "/usr/include/soci/soci.h"
