@@ -6,6 +6,8 @@
 #ifndef TOP_SWOP_H
 #define TOP_SWOP_H 201101L
 
+//#define NDEBUG
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -25,10 +27,7 @@ private:
 
   int calc_score() {
     assert(cpy.size() == p.size());
-    for(int i = 0; i < p.size(); ++i) {
-      cpy[i] = p[i];
-    }
-  //  cpy = p;
+    cpy = p;
     s = 0;
     while (cpy[0] != 1) {
       reverse(cpy.begin(), cpy.begin() + cpy[0]);
@@ -75,7 +74,10 @@ public:
   }
   
   int size() const {return p.size();}
-  int operator[](int i) const {return p[i];}
+  int operator[](int i) const {
+    assert(i >= 0 && i < size());
+    return p[i];
+  }
   
   void randomize() {
     random_shuffle(p.begin(), p.end());
@@ -119,9 +121,6 @@ ofstream log("best.log", ios::app);
 //
 ///////////////////////////////////////////////////////////
 
-// TODO: put all this in a class
-//map<int, Topswop> best;
-
 class Best {
 private:
   vector<Topswop> lst;
@@ -131,8 +130,15 @@ public:
 
   int size() const {return lst.size();}
 
-  Topswop operator[](int n) const {return lst[n-2];}
-  Topswop& operator[](int n) {return lst[n-2];}
+  Topswop operator[](int n) const {
+    assert(n >= 2 && n <= 97);
+    return lst[n-2];
+  }
+
+  Topswop& operator[](int n) {
+    assert(n >= 2 && n <= 97);
+    return lst[n-2];
+  }
 
   int total_score() {
     int result = 0;
