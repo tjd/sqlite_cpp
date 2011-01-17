@@ -33,7 +33,7 @@ class Topswop {
   
  public:
 
-  //default constuctor required by map
+  // default constuctor (required by map)
  Topswop() 
    : p(0), s(-1), score_up_to_date(false) {}
 
@@ -108,11 +108,20 @@ ostream& operator<<(ostream& os, const Topswop& p) {
 ///////////////////////////////////////////////////////////
 map<int, Topswop> best;
 
+int best_score() {
+  int result = 0;
+  for(int n = 2; n < 98; ++n) {
+    result += best[n].score();
+  }
+  return result;
+}
+
 void print_best() {
   for(int n = 2; n < 98; ++n) {
     Topswop p = best[n];
-    cout << n << ";" << p.score() << ": " << p << endl;
+    cout << "n=" << n << ";" << p.score() << ": " << p << endl;
   }
+  cout << "Total for score for best = " << best_score() << endl;
 }
 
 ofstream log("best.log", ios::app);
