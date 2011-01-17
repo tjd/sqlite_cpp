@@ -19,7 +19,7 @@ int main() {
     best[n] = p;
   }
 
-  print_best();
-  save_best();
+  best.print();
+  best.save();
   cout << "test done\n";
 }

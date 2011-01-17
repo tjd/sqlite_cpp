@@ -12,17 +12,23 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 using namespace std;
 
 class Topswop {
- private:
+private:
   vector<int> p;
   int s; // score for p
   bool score_up_to_date;
+  vector<int> cpy; // utility vector for score
 
   int calc_score() {
-    vector<int> cpy(p);
+    assert(cpy.size() == p.size());
+    for(int i = 0; i < p.size(); ++i) {
+      cpy[i] = p[i];
+    }
+  //  cpy = p;
     s = 0;
     while (cpy[0] != 1) {
       reverse(cpy.begin(), cpy.begin() + cpy[0]);
@@ -31,13 +37,13 @@ class Topswop {
     score_up_to_date = true;
   }
   
- public:
+public:
 
   // default constuctor (required by map)
  Topswop() 
-   : p(0), s(-1), score_up_to_date(false) {}
-
-  Topswop(int n) : p(n), s(0), score_up_to_date(true) {
+   : p(0), cpy(0), s(-1), score_up_to_date(false) {}
+  
+ Topswop(int n) : p(n), cpy(n), s(0), score_up_to_date(true) {
     for(int i = 0; i < n; ++i) {
       p[i] = i + 1;
     }
@@ -45,13 +51,15 @@ class Topswop {
   
   // copy constructor
   Topswop(const Topswop& other) 
-    : p(other.p), s(other.s), score_up_to_date(other.score_up_to_date) 
+    : p(other.p), cpy(other.cpy), s(other.s), 
+      score_up_to_date(other.score_up_to_date) 
   {}
 
   // assignment operator
   Topswop& operator=(const Topswop& other) {
     if (this != &other) {
-      p = other.p; 
+      p = other.p;
+      cpy = other.cpy; 
       s = other.s;
       score_up_to_date = score_up_to_date;
     }
@@ -101,36 +109,55 @@ ostream& operator<<(ostream& os, const Topswop& p) {
 }
 
 ///////////////////////////////////////////////////////////
+
+ofstream log("best.log", ios::app);
+
+///////////////////////////////////////////////////////////
 //
 // Store the best topswops found so far in a map.
 //   e.g. best[34] is the best Topswop for size 34
 //
 ///////////////////////////////////////////////////////////
-map<int, Topswop> best;
 
-int best_score() {
-  int result = 0;
-  for(int n = 2; n < 98; ++n) {
-    result += best[n].score();
+// TODO: put all this in a class
+//map<int, Topswop> best;
+
+class Best {
+private:
+  vector<Topswop> lst;
+
+public:
+  Best() : lst(96) {}
+
+  int size() const {return lst.size();}
+
+  Topswop operator[](int n) const {return lst[n-2];}
+  Topswop& operator[](int n) {return lst[n-2];}
+
+  int total_score() {
+    int result = 0;
+    for(int i = 0; i < lst.size(); ++i) {
+      result += lst[i].score();
+    }
+    return result;
   }
-  return result;
-}
-
-void print_best() {
-  for(int n = 2; n < 98; ++n) {
-    Topswop p = best[n];
-    cout << "n=" << n << ";" << p.score() << ": " << p << endl;
+  
+  void print() {
+    for(int i = 0; i < lst.size(); ++i) {
+      Topswop p = lst[i];
+      cout << "n=" << (i+2) << ";" << p.score() << ": " << p << endl;
+    }
+    int ts = total_score();
+    cout << "Total for score for best = " << ts << endl;
   }
-  cout << "Total for score for best = " << best_score() << endl;
-}
-
-ofstream log("best.log", ios::app);
-
-void save_best() {
-  for(int n = 2; n < 98; ++n) {
-    Topswop p = best[n];
-    log << n << " " << p.score() << ": " << p << endl;
+  
+  void save() {
+    for(int i = 0; i < lst.size(); ++i) {
+      Topswop p = lst[i];
+      log << (i+2) << " " << p.score() << ": " << p << endl;
+    }
   }
-}
+
+} best;
 
 #endif

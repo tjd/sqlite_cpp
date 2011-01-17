@@ -7,6 +7,7 @@ int main() {
   srand(time(NULL));
   vector<Topswop> pop;
   for(int n = 2; n < 98; ++n) {
+    //cout << "n=" << n << endl;
     Topswop p(n);
     pop.push_back(p);
     p.randomize();
@@ -14,14 +15,16 @@ int main() {
   }
 
   cout << "(running)" << endl;
-  for(int i = 0; i < 100000; ++i) {
-    for(int n = 2; n < 98; ++n) {
-      pop[n-2].randomize();
-      if (pop[n-2].score() > best[n].score()) {
-        best[n] = pop[n-2];
+  for(int iter = 0; iter < 10000; ++iter) {
+    for(int n = 3; n < 98; ++n) {
+      //      const int n = i + 2;
+      Topswop& p = pop[n-2];
+      p.randomize();
+      if (p.score() > best[n].score()) {
+        best[n] = p;
       }
     }
   }
 
-  print_best();
+  best.print();
 }
