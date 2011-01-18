@@ -21,5 +21,6 @@ int main() {
 
   best.print();
   best.save();
+
   cout << "test done\n";
 }

@@ -14,18 +14,39 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <assert.h>
+#include <stdlib.h>
 
 using namespace std;
+
+inline void note(const string& s) {
+  cout << '[' << s << ']' << flush;
+}
+
+inline void noteln(const string& s) {
+  note(s);
+  cout << endl;
+}
+
+inline double rand_double() {return rand() / RAND_MAX;}
+
+template<class T> string to_string(const T& t) {
+  ostringstream os;
+  os << t;
+  return os.str();
+}
+
+/////////////////////////////////////////////////////////////////////////
 
 class Topswop {
 private:
   vector<int> p;
-  int s; // score for p
-  bool score_up_to_date;
-  vector<int> cpy; // utility vector for score
+  mutable int s; // score for p
+  mutable bool score_up_to_date;
+  mutable vector<int> cpy; // utility vector for score
 
-  int calc_score() {
+  int calc_score() const {
     assert(cpy.size() == p.size());
     cpy = p;
     s = 0;
@@ -68,7 +89,7 @@ public:
   //destructor
   ~Topswop() {}
 
-  int score() {
+  int score() const {
     if (!score_up_to_date) calc_score();
     return s;
   }
@@ -91,6 +112,12 @@ public:
     score_up_to_date = false;
   }
   
+  void rand_swap() {
+    int a = rand() % size();
+    int b = rand() % size(); 
+    swap(a, b);
+  }
+
   void rev(int i, int j) {
     reverse(p.begin() + i, p.begin() + j);
     score_up_to_date = false;
@@ -106,6 +133,18 @@ ostream& operator<<(ostream& os, const Topswop& p) {
   else {  // p has at least 2 elements
     os << p[0];
     for(int i = 1; i < n; ++i) os << sep << p[i];
+  }
+  return os;
+}
+
+template<class T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+  const int n = v.size();
+  if (n == 0) return os;
+  else if (n == 1) os << v[0];
+  else {  // v has at least 2 elements
+    os << v[0];
+    for(int i = 1; i < n; ++i) os << sep << v[i];
   }
   return os;
 }
@@ -140,7 +179,7 @@ public:
     return lst[n-2];
   }
 
-  int total_score() {
+  int total_score() const {
     int result = 0;
     for(int i = 0; i < lst.size(); ++i) {
       result += lst[i].score();
@@ -148,7 +187,7 @@ public:
     return result;
   }
   
-  void print() {
+  void print() const {
     for(int i = 0; i < lst.size(); ++i) {
       Topswop p = lst[i];
       cout << "n=" << (i+2) << ";" << p.score() << ": " << p << endl;
@@ -157,7 +196,7 @@ public:
     cout << "Total for score for best = " << ts << endl;
   }
   
-  void save() {
+  void save() const {
     for(int i = 0; i < lst.size(); ++i) {
       Topswop p = lst[i];
       log << (i+2) << " " << p.score() << ": " << p << endl;

@@ -7,7 +7,6 @@ int main() {
   srand(time(NULL));
   vector<Topswop> pop;
   for(int n = 2; n < 98; ++n) {
-    //cout << "n=" << n << endl;
     Topswop p(n);
     pop.push_back(p);
     p.randomize();
