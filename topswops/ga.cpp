@@ -43,10 +43,14 @@ is reached, etc.
 #include "topswop.h"
 
 const int POP_SIZE = 100;
-const int N = 7;
-const double MUTATION_RATE = 0.10;
+const int N = 10;
+const double TOP_PCT = 0.75;  // between 0 and 1
+const double MUTATE_PCT = 0.10;  // between 0 and 1
 
-vector<Topswop> pop (POP_SIZE);
+const int END_TOP = N * TOP_PCT;
+const int MUTATE_NUM = N * MUTATE_PCT;
+
+vector<Topswop> pop(POP_SIZE);
 vector<Topswop> next_pop(POP_SIZE);
 
 inline bool less_than(const Topswop& a, const Topswop& b) {
@@ -57,81 +61,42 @@ inline bool greater_than(const Topswop& a, const Topswop& b) {
   return a.score() > b.score();
 }
 
-/*
-vector<Topswop>* select_roulette(vector<Topswop>* pop) {
-  assert(pop != 0);
-  assert(pop->size() == POP_SIZE);
-
-  sort(pop->begin(), pop->end(), greater_than);
-
-  vector<double> accum(pop->size());
-  double total_fitness = 0;
-  for(int i = 0; i < pop->size(); ++i) {
-    int si = (*pop)[i].score();
-    total_fitness += si;
-  }
-
-  for(int i = 0; i < pop->size(); ++i) {
-    int si = (*pop)[i].score();
-    accum[i] = si / total_fitness + ((i == 0) ? 0: accum[i-1]);
-  }
-
-  vector<Topswop>* next_pop = new vector<Topswop>(pop->size());
-
-  // roulette-wheel selection for next population
-  for(int n = 0; n < pop->size(); ++n) {
-    double r = rand_double();
-    for(int i = 0; i < pop->size(); ++i) {
-      if (accum[i] >= r) {
-        (*next_pop)[n] = (*pop)[i];
-        break;
-      }
-    } // for
-  } // for
-
-  return next_pop;
-}
-*/
-
 inline void simple_mutate(Topswop& t) {
-  for(int i = 0; i < 0.1 * N; ++i)
+  Trace trace("simple_mutate");
+  for(int i = 0; i < MUTATE_NUM; ++i) {
+    note("i = " + to_string(i));
+    //    cout << t << endl;
     t.rand_swap();    
+  }
 }
 
 // The top 75% (or so) make it to the next generation.
 // The other 25% come from mutations of that top 75%.
-void select_simple(double top_pct = 0.75) {
-  assert(top_pct >= 0 && top_pct <= 1);
+void select_simple() {
+  Trace t("select_simple");
+
+  assert(TOP_PCT >= 0 && TOP_PCT <= 1);
 
   // sort pop from best to worst
+  noteln("sorting");
   sort(pop.begin(), pop.end(), greater_than);
 
   // copy the top_pct elements of pop into next_pop
-  //vector<Topswop>* next_pop = new vector<Topswop>(pop.size());
-  const int end_top = top_pct * pop.size();
-  copy(pop.begin(), pop.begin() + end_top, next_pop.begin());
+  noteln("copying");
+  copy(pop.begin(), pop.begin() + END_TOP, next_pop.begin());
 
   // randomly shuffle the top elements of pop
-  random_shuffle(pop.begin(), pop.begin() + end_top);
+  noteln("shuffling");
+  random_shuffle(pop.begin(), pop.begin() + END_TOP);
 
   // mutate (1-top_pct) elements of pop and add them to end of
   // next_pop
-  copy(pop.begin(), pop.begin() + (1 - top_pct) * pop.size(),
-       next_pop.begin() + end_top);
-  for_each(next_pop.begin() + end_top, next_pop.end(), simple_mutate);
+  noteln("copying");
+  copy(pop.begin(), pop.begin() + (1 - TOP_PCT) * N,
+       next_pop.begin() + END_TOP);
+  noteln("mutating");
+  for_each(next_pop.begin() + END_TOP, next_pop.end(), simple_mutate);
 }
-
-/*
-void mutator(Topswop& t) {
-  if (rand_double() <= MUTATION_RATE) t.rand_swap();    
-}
-
-void mutate(vector<Topswop>* pop) {
-  assert(pop != 0);
-  assert(pop->size() == POP_SIZE);
-  for_each(pop->begin(), pop->end(), mutator);
-}
-*/
 
 // create a new Topswop of size N with its elements in random order
 Topswop init_ga_topswop() {
@@ -149,11 +114,20 @@ int ga(int max_iter = 5) {
 
   noteln("starting main iterations");
   for(int iter = 0; iter < max_iter; ++iter) {
+    note(to_string(iter));
     select_simple();
     pop.swap(next_pop);
   }
 }
 
 int main() {
+  cout << "Simple GA Test\n\n";
+  print_var("POP_SIZE", POP_SIZE);
+  print_var("N", N);
+  print_var("TOP_PCT", TOP_PCT);
+  print_var("MUTATE_PCT", MUTATE_PCT);
+  print_var("END_TOP", END_TOP);
+  print_var("MUTATE_NUM", MUTATE_NUM);
+  cout << "\n\n";
   ga();
 }

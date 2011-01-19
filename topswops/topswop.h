@@ -20,6 +20,17 @@
 
 using namespace std;
 
+inline double rand_double() {return rand() / RAND_MAX;}
+
+template<class T> string to_string(const T& t) {
+  ostringstream os;
+  os << t;
+  return os.str();
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+
 inline void note(const string& s) {
   cout << '[' << s << ']' << flush;
 }
@@ -29,13 +40,23 @@ inline void noteln(const string& s) {
   cout << endl;
 }
 
-inline double rand_double() {return rand() / RAND_MAX;}
-
-template<class T> string to_string(const T& t) {
-  ostringstream os;
-  os << t;
-  return os.str();
+template<class T>
+inline void print_var(const string& name, const T& var) {
+  cout << name << " = " << var << endl;
 }
+
+struct Trace {
+  Trace(string fname) : fn(fname) {
+    cout << "calling " << fn << "..." << endl;
+  }
+
+  ~Trace() {
+    cout << "... " << fn << " done" << endl;
+  }
+
+private:
+  string fn;
+}; // Trace
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -106,6 +127,7 @@ public:
   }
   
   void swap(int i, int j) {
+    Trace t("swap");
     int temp = p[i];
     p[i] = p[j];
     p[j] = temp;
@@ -113,6 +135,8 @@ public:
   }
   
   void rand_swap() {
+    Trace t("rand_swap");
+    cout << "size() == " << size() << endl;
     int a = rand() % size();
     int b = rand() % size(); 
     swap(a, b);
