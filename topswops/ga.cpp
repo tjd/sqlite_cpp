@@ -46,16 +46,16 @@ const int POP_SIZE = 100;
 const int N = 7;
 const double MUTATION_RATE = 0.10;
 
-bool less_than(const Topswop& a, const Topswop& b) {
+inline bool less_than(const Topswop& a, const Topswop& b) {
   return a.score() < b.score();
 }
 
-bool greater_than(const Topswop& a, const Topswop& b) {
+inline bool greater_than(const Topswop& a, const Topswop& b) {
   return a.score() > b.score();
 }
 
 
-vector<Topswop>* select(vector<Topswop>* pop) {
+vector<Topswop>* select_roulette(vector<Topswop>* pop) {
   assert(pop != 0);
   assert(pop->size() == POP_SIZE);
 
@@ -89,6 +89,38 @@ vector<Topswop>* select(vector<Topswop>* pop) {
   return next_pop;
 }
 
+inline void simple_mutate(Topswop& t) {
+  for(int i = 0; i < 0.1 * N; ++i)
+    t.rand_swap();    
+}
+
+// The top 75% (or so) make it to the next generation.
+// The other 25% come from mutations of that top 75%.
+vector<Topswop>* select_simple(vector<Topswop>* pop, double top_pct = 0.75) {
+  assert(pop != 0);
+  assert(pop->size() == POP_SIZE);
+  assert(top_pct >= 0 && top_pct <= 1);
+
+  // sort pop from best to worst
+  sort(pop->begin(), pop->end(), greater_than);
+
+  // copy the top_pct elements of pop into next_pop
+  vector<Topswop>* next_pop = new vector<Topswop>(pop->size());
+  const int end_top = top_pct * pop->size();
+  copy(pop->begin(), pop->begin() + end_top, next_pop->begin());
+
+  // randomly shuffle the top elements of pop
+  random_shuffle(pop->begin(), pop->begin() + end_top);
+
+  // mutate (1-top_pct) elements of pop and add them to end of
+  // next_pop
+  copy(pop->begin(), pop->begin() + (1 - top_pct) * pop->size(),
+       next_pop->begin() + end_top);
+  for_each(next_pop->begin() + end_top, next_pop->end(), simple_mutate);
+
+  return next_pop;
+}
+
 void mutator(Topswop& t) {
   if (rand_double() <= MUTATION_RATE) t.rand_swap();    
 }
@@ -99,32 +131,26 @@ void mutate(vector<Topswop>* pop) {
   for_each(pop->begin(), pop->end(), mutator);
 }
 
+// create a new Topswop of size N with its elements in random order
+Topswop init_ga_topswop() {
+  Topswop t(N);
+  t.randomize();
+  return t;
+}
+
 int ga(int max_iter = 5) {
   //
   // initialization
   //
   noteln("initialization");
   vector<Topswop>* pop = new vector<Topswop>(POP_SIZE);
-  for(vector<Topswop>::iterator p = pop->begin(); p != pop->end(); ++p) {
-    *p = Topswop(N);
-    p->randomize();
-  }
-
-//   for(int i = 0; i < pop->size(); ++i) {
-//     (*pop)[i] = Topswop(N);
-//     (*pop)[i].randomize();
-//   }
+  generate(pop->begin(), pop->end(), init_ga_topswop);
 
   noteln("starting main iterations");
   for(int iter = 0; iter < max_iter; ++iter) {
-//     if (iter % 1 == 0) {
-//       cout << "iteration = " << iter << endl;
-//       cout << *pop;
-//     }
-    vector<Topswop>* next_pop = select(pop);
+    vector<Topswop>* next_pop = select_simple(pop);
     delete pop;
     pop = next_pop;
-    mutate(pop);
   }
 }
 
