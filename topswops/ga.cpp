@@ -51,7 +51,6 @@ const int END_TOP = N * TOP_PCT;
 const int MUTATE_NUM = N * MUTATE_PCT;
 
 vector<Topswop> pop(POP_SIZE);
-vector<Topswop> next_pop(POP_SIZE);
 
 inline bool less_than(const Topswop& a, const Topswop& b) {
   return a.score() < b.score();
@@ -81,21 +80,13 @@ void select_simple() {
   noteln("sorting");
   sort(pop.begin(), pop.end(), greater_than);
 
-  // copy the top_pct elements of pop into next_pop
-  noteln("copying");
-  copy(pop.begin(), pop.begin() + END_TOP, next_pop.begin());
-
   // randomly shuffle the top elements of pop
   noteln("shuffling");
   random_shuffle(pop.begin(), pop.begin() + END_TOP);
 
-  // mutate (1-top_pct) elements of pop and add them to end of
-  // next_pop
-  noteln("copying");
-  copy(pop.begin(), pop.begin() + (1 - TOP_PCT) * N,
-       next_pop.begin() + END_TOP);
+  // mutate (1-top_pct) elements of pop
   noteln("mutating");
-  for_each(next_pop.begin() + END_TOP, next_pop.end(), simple_mutate);
+  for_each(pop.begin() + END_TOP, pop.end(), simple_mutate);
 }
 
 // create a new Topswop of size N with its elements in random order
@@ -116,7 +107,6 @@ int ga(int max_iter = 5) {
   for(int iter = 0; iter < max_iter; ++iter) {
     note(to_string(iter));
     select_simple();
-    pop.swap(next_pop);
   }
 }
 
