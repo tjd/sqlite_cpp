@@ -9,7 +9,7 @@ perf_ex: perf.cpp topswop.h
 	g++ -O3 perf.cpp -o perf_ex #-fopenmp
 
 ga_ex: ga.cpp topswop.h
-	g++ -O2 ga.cpp -o ga_ex #-fopenmp
+	g++ -O3 ga.cpp -o ga_ex #-fopenmp
 
 clean:
 	rm -rf *_ex

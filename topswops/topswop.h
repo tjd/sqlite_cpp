@@ -11,7 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <map>
+#include <numeric>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -121,13 +121,59 @@ public:
     return p[i];
   }
   
+  bool local_improve_swap() {
+    int best_i = -1, best_j = -1, best_score = score();
+    for(int i = 0; i < size(); ++i) {
+      for(int j = i + 1; j < size(); ++j) {
+        swap(p[i], p[j]);
+        int ss = calc_score();
+        if (ss > best_score) {
+          best_score = ss; 
+          best_i = i;
+          best_j = j;
+        }
+        swap(p[i], p[j]);
+      }
+    }
+    score_up_to_date = true;
+    if (best_i != -1) {
+      swap(p[best_i], p[best_j]);
+      s = best_score;
+      return true;
+    }
+    return false;
+  }
+
+  bool local_improve_reverse() {
+    int best_i = -1, best_j = -1, best_score = score();
+    for(int i = 0; i < size(); ++i) {
+      for(int j = i + 1; j < size(); ++j) {
+        reverse(p.begin() + i, p.begin() + j);
+        int ss = calc_score();
+        if (ss > best_score) {
+          best_score = ss; 
+          best_i = i;
+          best_j = j;
+        }
+        reverse(p.begin() + i, p.begin() + j);
+      }
+    }
+    score_up_to_date = true;
+    if (best_i != -1) {
+      reverse(p.begin() + best_i, p.begin() + best_j);
+      s = best_score;
+      return true;
+    }
+    return false;
+  }
+
   void randomize() {
     random_shuffle(p.begin(), p.end());
     score_up_to_date = false;
   }
   
-  void swap(int i, int j) {
-    Trace t("swap");
+  void do_swap(int i, int j) {
+    //    Trace t("swap");
     int temp = p[i];
     p[i] = p[j];
     p[j] = temp;
@@ -135,11 +181,10 @@ public:
   }
   
   void rand_swap() {
-    Trace t("rand_swap");
-    cout << "size() == " << size() << endl;
+    //    Trace t("rand_swap");
     int a = rand() % size();
     int b = rand() % size(); 
-    swap(a, b);
+    do_swap(a, b);
   }
 
   void rev(int i, int j) {
@@ -147,6 +192,18 @@ public:
     score_up_to_date = false;
   }
 }; // class Topswop
+
+bool operator<(const Topswop& a, const Topswop& b) {
+  return a.score() < b.score();
+}
+
+bool operator>(const Topswop& a, const Topswop& b) {
+  return a.score() > b.score();
+}
+
+int operator+(const Topswop& a, const Topswop& b) {
+  return a.score() + b.score();
+}
 
 
 const string sep = " ";

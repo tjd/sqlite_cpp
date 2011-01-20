@@ -43,12 +43,14 @@ is reached, etc.
 #include "topswop.h"
 
 const int POP_SIZE = 100;
-const int N = 10;
+const int N = 31;
 const double TOP_PCT = 0.75;  // between 0 and 1
 const double MUTATE_PCT = 0.10;  // between 0 and 1
 
 const int END_TOP = N * TOP_PCT;
 const int MUTATE_NUM = N * MUTATE_PCT;
+
+const int RAND_SEED = 12345;
 
 vector<Topswop> pop(POP_SIZE);
 
@@ -60,11 +62,16 @@ inline bool greater_than(const Topswop& a, const Topswop& b) {
   return a.score() > b.score();
 }
 
+int total_pop_score() {
+  int result = 0;
+  for(int i = 0; i < pop.size(); ++i) {
+    result += pop[i].score();
+  }
+  return result;
+}
+
 inline void simple_mutate(Topswop& t) {
-  Trace trace("simple_mutate");
   for(int i = 0; i < MUTATE_NUM; ++i) {
-    note("i = " + to_string(i));
-    //    cout << t << endl;
     t.rand_swap();    
   }
 }
@@ -72,20 +79,20 @@ inline void simple_mutate(Topswop& t) {
 // The top 75% (or so) make it to the next generation.
 // The other 25% come from mutations of that top 75%.
 void select_simple() {
-  Trace t("select_simple");
+  //  Trace trace("select_simple");
 
   assert(TOP_PCT >= 0 && TOP_PCT <= 1);
 
   // sort pop from best to worst
-  noteln("sorting");
+  //  noteln("sorting");
   sort(pop.begin(), pop.end(), greater_than);
 
   // randomly shuffle the top elements of pop
-  noteln("shuffling");
+  //  noteln("shuffling");
   random_shuffle(pop.begin(), pop.begin() + END_TOP);
 
   // mutate (1-top_pct) elements of pop
-  noteln("mutating");
+  //  noteln("mutating");
   for_each(pop.begin() + END_TOP, pop.end(), simple_mutate);
 }
 
@@ -96,18 +103,48 @@ Topswop init_ga_topswop() {
   return t;
 }
 
-int ga(int max_iter = 5) {
+void local_improve(Topswop& t) {
+  while (t.local_improve_swap());
+  while (t.local_improve_reverse());
+}
+
+int ga(int max_iter = 500000000) {
   //
   // initialization
   //
-  noteln("initialization");
+  //noteln("initialization");
+  srand(RAND_SEED);
   generate(pop.begin(), pop.end(), init_ga_topswop);
-
-  noteln("starting main iterations");
+  int best_tps = total_pop_score();
+  vector<Topswop> best_pop(pop);
+  Topswop best_overall_topswop = *max_element(pop.begin(), pop.end());
+  cout << "Best pop score (0): " << best_tps << endl;
+  cout << "Best so far (0): N = " << N << ", score = " 
+       << best_overall_topswop.score() << endl
+       << "  " << best_overall_topswop << endl;
+  
+  //noteln("starting main iterations");
   for(int iter = 0; iter < max_iter; ++iter) {
-    note(to_string(iter));
     select_simple();
+    for_each(pop.begin(), pop.end(), local_improve);
+    // has the total population score increased?
+    int tps = total_pop_score();
+    if (tps > best_tps) {
+      best_tps = tps;
+      best_pop = pop;
+      cout << "Best pop score (" << iter << "): " << best_tps << endl;
+    }
+
+    // has a new best individual Topswop been found?
+    Topswop best_ts = *max_element(pop.begin(), pop.end());
+    if (best_ts > best_overall_topswop) {
+      best_overall_topswop = best_ts;
+      cout << "Best so far (" << iter << "): N = " << N << ", score = " 
+           << best_overall_topswop.score() << endl
+           << "  " << best_overall_topswop << endl;
+    }
   }
+  noteln("all done");
 }
 
 int main() {
@@ -118,6 +155,7 @@ int main() {
   print_var("MUTATE_PCT", MUTATE_PCT);
   print_var("END_TOP", END_TOP);
   print_var("MUTATE_NUM", MUTATE_NUM);
-  cout << "\n\n";
+  print_var("RAND_SEED", RAND_SEED);
+  cout << "\n";
   ga();
 }
