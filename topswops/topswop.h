@@ -167,6 +167,18 @@ public:
     return false;
   }
 
+  bool back_improve() {
+    bool changed = false;
+    for(int i = 1; i < size(); ++i) {
+      if (p[i] == i + 1) {
+        reverse(p.begin(), p.begin() + i + 1);
+        score_up_to_date = false;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   void randomize() {
     random_shuffle(p.begin(), p.end());
     score_up_to_date = false;

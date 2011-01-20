@@ -45,12 +45,15 @@ is reached, etc.
 const int POP_SIZE = 100;
 const int N = 31;
 const double TOP_PCT = 0.75;  // between 0 and 1
-const double MUTATE_PCT = 0.10;  // between 0 and 1
+const double MUTATE_PCT = 0.20;  // between 0 and 1
 
 const int END_TOP = N * TOP_PCT;
 const int MUTATE_NUM = N * MUTATE_PCT;
 
 const int RAND_SEED = 12345;
+
+const bool LOCAL_IMPROVE = false;
+const bool BACK_IMPROVE = true;
 
 vector<Topswop> pop(POP_SIZE);
 
@@ -103,9 +106,14 @@ Topswop init_ga_topswop() {
   return t;
 }
 
+// Appear to get better results WITHOUT using local_improve.
 void local_improve(Topswop& t) {
   while (t.local_improve_swap());
   while (t.local_improve_reverse());
+}
+
+void back_improve(Topswop& t) {
+  while (t.back_improve());
 }
 
 int ga(int max_iter = 500000000) {
@@ -125,9 +133,14 @@ int ga(int max_iter = 500000000) {
   
   //noteln("starting main iterations");
   for(int iter = 0; iter < max_iter; ++iter) {
+    //noteln(to_string(iter));
     select_simple();
-    for_each(pop.begin(), pop.end(), local_improve);
-    // has the total population score increased?
+    if (LOCAL_IMPROVE) 
+      for_each(pop.begin(), pop.end(), local_improve);
+    if (BACK_IMPROVE) 
+      for_each(pop.begin(), pop.end(), back_improve);
+
+    //noteln("calculating tps ...");
     int tps = total_pop_score();
     if (tps > best_tps) {
       best_tps = tps;
@@ -156,6 +169,8 @@ int main() {
   print_var("END_TOP", END_TOP);
   print_var("MUTATE_NUM", MUTATE_NUM);
   print_var("RAND_SEED", RAND_SEED);
+  print_var("LOCAL_IMPROVE", LOCAL_IMPROVE);
+  print_var("BACK_IMPROVE", BACK_IMPROVE);
   cout << "\n";
   ga();
 }
