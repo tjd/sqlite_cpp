@@ -144,6 +144,28 @@ public:
     return false;
   }
 
+  bool local_improve_swap_home() {
+    int best_a = -1, best_b = -1, best_score = score();
+    for(int i = 0; i < size(); ++i) {
+      int a = i, b = p[i] - 1;
+      swap(a, b);
+      int ss = calc_score();
+      if (ss > best_score) {
+        best_score = ss; 
+        best_a = a;         
+        best_b = b;
+      }
+      swap(a, b);
+    }
+    score_up_to_date = true;
+    if (best_a != -1) {
+      swap(best_a, best_b);
+      s = best_score;
+      return true;
+    }
+    return false;
+  }
+
   bool local_improve_reverse() {
     int best_i = -1, best_j = -1, best_score = score();
     for(int i = 0; i < size(); ++i) {
@@ -185,7 +207,6 @@ public:
   }
   
   void do_swap(int i, int j) {
-    //    Trace t("swap");
     int temp = p[i];
     p[i] = p[j];
     p[j] = temp;
@@ -193,16 +214,40 @@ public:
   }
   
   void rand_swap() {
-    //    Trace t("rand_swap");
     int a = rand() % size();
     int b = rand() % size(); 
     do_swap(a, b);
   }
 
-  void rev(int i, int j) {
+  void do_swap_home(int i) {
+    do_swap(i, p[i] - 1);
+  }
+
+  void rand_swap_home() {
+    int a = rand() % size();
+    do_swap_home(a);
+  }
+
+  void do_rev(int i, int j) {
     reverse(p.begin() + i, p.begin() + j);
     score_up_to_date = false;
   }
+
+  void do_rev_home(int i) {
+    do_rev(i, p[i] - 1);
+  }
+
+  void rand_rev_home() {
+    int a = rand() % size();
+    do_rev_home(a);
+  }
+
+  void rand_rev() {
+    int a = rand() % size();
+    int b = rand() % size(); 
+    do_rev(a, b);
+  }
+
 }; // class Topswop
 
 bool operator<(const Topswop& a, const Topswop& b) {

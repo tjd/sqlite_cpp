@@ -45,15 +45,15 @@ is reached, etc.
 const int POP_SIZE = 100;
 const int N = 31;
 const double TOP_PCT = 0.75;  // between 0 and 1
-const double MUTATE_PCT = 0.20;  // between 0 and 1
-
-const int END_TOP = N * TOP_PCT;
-const int MUTATE_NUM = N * MUTATE_PCT;
-
-const int RAND_SEED = 12345;
-
+const double MUTATE_PCT = 0.10;  // between 0 and 1
+const unsigned int RAND_SEED = 12345;
 const bool LOCAL_IMPROVE = false;
 const bool BACK_IMPROVE = true;
+
+const int END_TOP = N * TOP_PCT;
+const int BOTTOM_SIZE = N * (1 - TOP_PCT);
+const int MUTATE_NUM = N * MUTATE_PCT;
+
 
 vector<Topswop> pop(POP_SIZE);
 
@@ -75,7 +75,7 @@ int total_pop_score() {
 
 inline void simple_mutate(Topswop& t) {
   for(int i = 0; i < MUTATE_NUM; ++i) {
-    t.rand_swap();    
+    t.rand_rev();    
   }
 }
 
@@ -87,15 +87,18 @@ void select_simple() {
   assert(TOP_PCT >= 0 && TOP_PCT <= 1);
 
   // sort pop from best to worst
-  //  noteln("sorting");
+  //noteln("sorting");
   sort(pop.begin(), pop.end(), greater_than);
 
   // randomly shuffle the top elements of pop
-  //  noteln("shuffling");
+  //noteln("shuffling");
   random_shuffle(pop.begin(), pop.begin() + END_TOP);
+  //noteln("copying");
+  copy(pop.begin(), pop.begin() + BOTTOM_SIZE, 
+       pop.begin() + END_TOP);
 
   // mutate (1-top_pct) elements of pop
-  //  noteln("mutating");
+  //noteln("mutating");
   for_each(pop.begin() + END_TOP, pop.end(), simple_mutate);
 }
 
@@ -108,15 +111,16 @@ Topswop init_ga_topswop() {
 
 // Appear to get better results WITHOUT using local_improve.
 void local_improve(Topswop& t) {
-  while (t.local_improve_swap());
-  while (t.local_improve_reverse());
+  while (t.local_improve_swap_home());
+//   while (t.local_improve_swap());
+//   while (t.local_improve_reverse());
 }
 
 void back_improve(Topswop& t) {
   while (t.back_improve());
 }
 
-int ga(int max_iter = 500000000) {
+int ga(long max_iter = 500000000) {
   //
   // initialization
   //
@@ -132,11 +136,13 @@ int ga(int max_iter = 500000000) {
        << "  " << best_overall_topswop << endl;
   
   //noteln("starting main iterations");
-  for(int iter = 0; iter < max_iter; ++iter) {
+  for(long iter = 0; iter < max_iter; ++iter) {
     //noteln(to_string(iter));
     select_simple();
+    //noteln("local_improve ...");
     if (LOCAL_IMPROVE) 
       for_each(pop.begin(), pop.end(), local_improve);
+    //noteln("back_improve ...");
     if (BACK_IMPROVE) 
       for_each(pop.begin(), pop.end(), back_improve);
 
