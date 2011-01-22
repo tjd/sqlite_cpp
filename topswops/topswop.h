@@ -28,6 +28,10 @@ template<class T> string to_string(const T& t) {
   return os.str();
 }
 
+class Topswop;
+const string sep = " ";
+ostream& operator<<(ostream& os, const Topswop& p);
+
 /////////////////////////////////////////////////////////////////////////
 
 
@@ -250,6 +254,17 @@ public:
 
 }; // class Topswop
 
+ostream& operator<<(ostream& os, const Topswop& p) {
+  const int n = p.size();
+  if (n == 0) return os;
+  else if (n == 1) os << p[0];
+  else {  // p has at least 2 elements
+    os << p[0];
+    for(int i = 1; i < n; ++i) os << sep << p[i];
+  }
+  return os;
+}
+
 bool operator<(const Topswop& a, const Topswop& b) {
   return a.score() < b.score();
 }
@@ -262,29 +277,57 @@ int operator+(const Topswop& a, const Topswop& b) {
   return a.score() + b.score();
 }
 
+///////////////////////////////////////////////////////////
 
-const string sep = " ";
-ostream& operator<<(ostream& os, const Topswop& p) {
-  const int n = p.size();
-  if (n == 0) return os;
-  else if (n == 1) os << p[0];
-  else {  // p has at least 2 elements
-    os << p[0];
-    for(int i = 1; i < n; ++i) os << sep << p[i];
-  }
-  return os;
+// no depth limit if cutoff_score == -1
+Topswop dfs(const Topswop& root, int cutoff_score = -1) {
+  const int n = root.size();
+  vector<Topswop> stack;
+  Topswop best(root);
+  stack.push_back(root);
+  int count = 0;
+  while (!stack.empty()) {
+    ++count;
+    Topswop ts = stack.back();  // pop the top of
+    stack.pop_back();           // the stack
+    if (ts.score() > best.score()) { // save ts if it's the best so far
+      best = ts;
+    } // if 
+    
+    // TODO: speed up scoring calculation 
+    // add ts's children to the stack
+    if (ts.score() < cutoff_score || cutoff_score == -1) {
+      for(int i = 1; i < n; ++i) {
+        if (ts[i] == i + 1) { // does ts[i] holds its home value?
+          Topswop cpy(ts);
+          cpy.do_rev(0, cpy[i]);
+          stack.push_back(cpy);
+        } // if
+      } // for
+    } // if
+  } // while
+  return best;
 }
 
-template<class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-  const int n = v.size();
-  if (n == 0) return os;
-  else if (n == 1) os << v[0];
-  else {  // v has at least 2 elements
-    os << v[0];
-    for(int i = 1; i < n; ++i) os << sep << v[i];
+Topswop back_dfs(Topswop ts, int stop_after = -1) {
+  const int n = ts.size();
+  Topswop best(ts);
+  int count = 0;
+  while (ts[0] != 1) {
+    ++count;
+    if (stop_after != -1 && count >= stop_after) return best;
+    ts.do_rev(0, ts[0]);
+//     cout << "(n=" << n << ";" << count << "; stop_after=" 
+//          << stop_after << ")" << flush;
+    Topswop result = dfs(ts, -1);
+    if (result.score() > best.score()) {
+      best = result;
+      //      cout << "\n! n = " << n << ", score = " << best.score() << endl
+      //           << "  " << best
+      //           << endl;
+    }
   }
-  return os;
+  return best;
 }
 
 ///////////////////////////////////////////////////////////

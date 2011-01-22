@@ -3,7 +3,7 @@
 #include "topswop.h"
 
 int main() {
-  srand(2);
+  srand(5);
   cout << "Running test ..." << endl;
   Topswop p(10);
   cout << "p.size() == " << p.size() << endl;
@@ -13,14 +13,23 @@ int main() {
   }
   p.randomize();
   cout << '\n';
-  cout << p << endl;
+  cout << p << " (" << p.score() << ")" << endl;
+  p.do_swap_home(2);
+  p.do_swap_home(3);
+  p.do_swap_home(4);
+  cout << dfs(p) << endl;
 
+  //  cout << p << " (" << p.score() << ")" << endl;
+
+  /*
   for(int n = 2; n < 98; ++n) {
     best[n] = p;
   }
 
   best.print();
-  best.save();
 
+  best.print();
+  //best.save();
+  */
   cout << "test done\n";
 }

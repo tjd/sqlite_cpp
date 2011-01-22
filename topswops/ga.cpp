@@ -45,8 +45,7 @@ is reached, etc.
 const int POP_SIZE = 100;
 const int N = 31;
 const double TOP_PCT = 0.75;  // between 0 and 1
-const double MUTATE_PCT = 0.10;  // between 0 and 1
-const unsigned int RAND_SEED = 12345;
+const double MUTATE_PCT = 0.20;  // between 0 and 1
 const bool LOCAL_IMPROVE = false;
 const bool BACK_IMPROVE = true;
 
@@ -54,6 +53,9 @@ const int END_TOP = N * TOP_PCT;
 const int BOTTOM_SIZE = N * (1 - TOP_PCT);
 const int MUTATE_NUM = N * MUTATE_PCT;
 
+const unsigned int RAND_SEED = 123456;
+
+////////////////////////////////////////////////////////////////////////
 
 vector<Topswop> pop(POP_SIZE);
 
@@ -82,8 +84,6 @@ inline void simple_mutate(Topswop& t) {
 // The top 75% (or so) make it to the next generation.
 // The other 25% come from mutations of that top 75%.
 void select_simple() {
-  //  Trace trace("select_simple");
-
   assert(TOP_PCT >= 0 && TOP_PCT <= 1);
 
   // sort pop from best to worst
@@ -92,7 +92,7 @@ void select_simple() {
 
   // randomly shuffle the top elements of pop
   //noteln("shuffling");
-  random_shuffle(pop.begin(), pop.begin() + END_TOP);
+  random_shuffle(pop.begin() + 2, pop.begin() + END_TOP);
   //noteln("copying");
   copy(pop.begin(), pop.begin() + BOTTOM_SIZE, 
        pop.begin() + END_TOP);
@@ -120,7 +120,7 @@ void back_improve(Topswop& t) {
   while (t.back_improve());
 }
 
-int ga(long max_iter = 500000000) {
+int ga(long max_iter = 5000000000) {
   //
   // initialization
   //
@@ -157,6 +157,21 @@ int ga(long max_iter = 500000000) {
     // has a new best individual Topswop been found?
     Topswop best_ts = *max_element(pop.begin(), pop.end());
     if (best_ts > best_overall_topswop) {
+      cout << "\nback_dfs ..." << flush;
+      for(int times = 0; times < 2; ++times) {
+        for(int i = 0; i < pop.size(); ++i) {
+          Topswop d = back_dfs(pop[i], 10);
+          int diff = d.score() - pop[i].score();
+          if (diff > 0) {
+            pop[i] = d;
+            //cout << "\n! pop[" << i << "] improved by " << diff << endl;
+          }
+        }
+      }
+      cout << "done back_dfs" << endl;
+
+      best_ts = *max_element(pop.begin(), pop.end());
+
       best_overall_topswop = best_ts;
       cout << "Best so far (" << iter << "): N = " << N << ", score = " 
            << best_overall_topswop.score() << endl
@@ -177,6 +192,7 @@ int main() {
   print_var("RAND_SEED", RAND_SEED);
   print_var("LOCAL_IMPROVE", LOCAL_IMPROVE);
   print_var("BACK_IMPROVE", BACK_IMPROVE);
+  print_var("BOTTOM_SIZE", BOTTOM_SIZE);
   cout << "\n";
   ga();
 }
