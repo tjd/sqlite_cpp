@@ -82,6 +82,11 @@ private:
     score_up_to_date = true;
   }
   
+  void set_score(int sc) {
+    s = sc;
+    score_up_to_date = true;
+  }
+
 public:
 
   // default constuctor (required by map)
@@ -252,6 +257,8 @@ public:
     do_rev(a, b);
   }
 
+  friend Topswop dfs(const Topswop& root, int cutoff_score);
+
 }; // class Topswop
 
 ostream& operator<<(ostream& os, const Topswop& p) {
@@ -290,17 +297,18 @@ Topswop dfs(const Topswop& root, int cutoff_score = -1) {
     ++count;
     Topswop ts = stack.back();  // pop the top of
     stack.pop_back();           // the stack
-    if (ts.score() > best.score()) { // save ts if it's the best so far
+    const int ts_score = ts.score();
+    if (ts_score > best.score()) { // save ts if it's the best so far
       best = ts;
     } // if 
     
-    // TODO: speed up scoring calculation 
     // add ts's children to the stack
-    if (ts.score() < cutoff_score || cutoff_score == -1) {
+    if (ts_score < cutoff_score || cutoff_score == -1) {
       for(int i = 1; i < n; ++i) {
         if (ts[i] == i + 1) { // does ts[i] holds its home value?
           Topswop cpy(ts);
           cpy.do_rev(0, cpy[i]);
+          cpy.set_score(ts_score + 1);
           stack.push_back(cpy);
         } // if
       } // for

@@ -42,18 +42,19 @@ is reached, etc.
 
 #include "topswop.h"
 
-const int POP_SIZE = 100;
+const int POP_SIZE = 50;
 const int N = 31;
 const double TOP_PCT = 0.75;  // between 0 and 1
 const double MUTATE_PCT = 0.20;  // between 0 and 1
-const bool LOCAL_IMPROVE = false;
+const int DO_NOT_SHUFFLE_TOP_N = 0;
+const bool LOCAL_IMPROVE = true;
 const bool BACK_IMPROVE = true;
 
 const int END_TOP = N * TOP_PCT;
 const int BOTTOM_SIZE = N * (1 - TOP_PCT);
 const int MUTATE_NUM = N * MUTATE_PCT;
 
-const unsigned int RAND_SEED = 123456;
+const unsigned int RAND_SEED = 1234567;
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +82,12 @@ inline void simple_mutate(Topswop& t) {
   }
 }
 
+inline void home_mutate(Topswop& t) {
+  for(int i = 0; i < MUTATE_NUM; ++i) {
+    t.rand_rev_home();    
+  }
+}
+
 // The top 75% (or so) make it to the next generation.
 // The other 25% come from mutations of that top 75%.
 void select_simple() {
@@ -92,7 +99,7 @@ void select_simple() {
 
   // randomly shuffle the top elements of pop
   //noteln("shuffling");
-  random_shuffle(pop.begin() + 2, pop.begin() + END_TOP);
+  random_shuffle(pop.begin() + DO_NOT_SHUFFLE_TOP_N, pop.begin() + END_TOP);
   //noteln("copying");
   copy(pop.begin(), pop.begin() + BOTTOM_SIZE, 
        pop.begin() + END_TOP);
@@ -112,8 +119,8 @@ Topswop init_ga_topswop() {
 // Appear to get better results WITHOUT using local_improve.
 void local_improve(Topswop& t) {
   while (t.local_improve_swap_home());
-//   while (t.local_improve_swap());
-//   while (t.local_improve_reverse());
+  while (t.local_improve_swap());
+  while (t.local_improve_reverse());
 }
 
 void back_improve(Topswop& t) {
@@ -139,12 +146,6 @@ int ga(long max_iter = 5000000000) {
   for(long iter = 0; iter < max_iter; ++iter) {
     //noteln(to_string(iter));
     select_simple();
-    //noteln("local_improve ...");
-    if (LOCAL_IMPROVE) 
-      for_each(pop.begin(), pop.end(), local_improve);
-    //noteln("back_improve ...");
-    if (BACK_IMPROVE) 
-      for_each(pop.begin(), pop.end(), back_improve);
 
     //noteln("calculating tps ...");
     int tps = total_pop_score();
@@ -157,21 +158,26 @@ int ga(long max_iter = 5000000000) {
     // has a new best individual Topswop been found?
     Topswop best_ts = *max_element(pop.begin(), pop.end());
     if (best_ts > best_overall_topswop) {
+      //noteln("local_improve ...");
+      if (LOCAL_IMPROVE) 
+        for_each(pop.begin(), pop.end(), local_improve);
+      //noteln("back_improve ...");
+      if (BACK_IMPROVE) 
+        for_each(pop.begin(), pop.end(), back_improve);
+      
       cout << "\nback_dfs ..." << flush;
-      for(int times = 0; times < 2; ++times) {
-        for(int i = 0; i < pop.size(); ++i) {
-          Topswop d = back_dfs(pop[i], 10);
-          int diff = d.score() - pop[i].score();
-          if (diff > 0) {
-            pop[i] = d;
-            //cout << "\n! pop[" << i << "] improved by " << diff << endl;
-          }
+      for(int i = 0; i < pop.size(); ++i) {
+        Topswop d = back_dfs(pop[i], 10);
+        int diff = d.score() - pop[i].score();
+        if (diff > 0) {
+          pop[i] = d;
+          //cout << "\n! pop[" << i << "] improved by " << diff << endl;
         }
       }
       cout << "done back_dfs" << endl;
-
+      
       best_ts = *max_element(pop.begin(), pop.end());
-
+      
       best_overall_topswop = best_ts;
       cout << "Best so far (" << iter << "): N = " << N << ", score = " 
            << best_overall_topswop.score() << endl
